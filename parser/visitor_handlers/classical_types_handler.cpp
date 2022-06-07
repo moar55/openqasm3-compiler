@@ -1,16 +1,16 @@
 #include "../visitor.hpp"
 
-antlrcpp::Any visitor::visitSingleDesignatorDeclaration(
+std::any visitor::visitSingleDesignatorDeclaration(
         qasmParser::SingleDesignatorDeclarationContext* context)  {
   return {};
 }
 
-antlrcpp::Any visitor::visitNoDesignatorDeclaration(
+std::any visitor::visitNoDesignatorDeclaration(
         qasmParser::NoDesignatorDeclarationContext* context) {
-  return {}
+  return {};
 }
 
-antlrcpp::Any visitor::visitBitDeclaration(
+std::any visitor::visitBitDeclaration(
         qasmParser::BitDeclarationContext* context) {
   return {};
 }

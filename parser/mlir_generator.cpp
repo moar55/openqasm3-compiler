@@ -11,6 +11,7 @@
 #include "mlir_generator.hpp"
 
 //#include "mlir/Dialect/
+#include "visitor.hpp"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "generated/qasmLexer.h"
 #include "generated/qasmParser.h"
@@ -177,12 +178,14 @@
     void MLIRGenerator::mlirgen(const std::string &src) {
       using namespace antlr4;
 
-//      if (!my_visitor) {
-//        my_visitor = std::make_shared<visitor>(builder, m_module, file_name
-//                                                  /*,enable_qir_apply_ifelse*/);
-//      }
+      if (!my_visitor) {
+        my_visitor = std::make_shared<visitor>(builder, m_module, file_name
+                                                  /*,enable_qir_apply_ifelse*/);
+      }
+//  auto symbol_table = visitor->getScopedSymbolTable();
 
-      ANTLRInputStream input(src);
+
+  ANTLRInputStream input(src);
       mlir::qasmLexer lexer(&input);
       CommonTokenStream tokens(&lexer);
       mlir::qasmParser parser(&tokens);
@@ -215,7 +218,7 @@
 
       // Get the parse tree and visit
       tree::ParseTree *tree = parser.program();
-//      my_visitor->visitChildren(tree);
+      my_visitor->visitChildren(tree);
 
       return;
     }

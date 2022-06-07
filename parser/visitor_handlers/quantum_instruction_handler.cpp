@@ -1,5 +1,5 @@
 #include "../visitor.hpp"
 
-antlrcpp::Any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *context) {
+std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *context) {
   return {};
 }

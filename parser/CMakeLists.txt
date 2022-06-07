@@ -1,1 +1,2 @@
-add_library(generator mlir_generator.cpp generated/qasmVisitor.cpp generated/qasmLexer.cpp generated/qasmParser.cpp)
+file(GLOB SRC *.cpp generated/*.cpp visitor_handlers/*.cpp)
+add_library(generator ${SRC})

@@ -8,48 +8,51 @@
 #include "utils/symbol_table.hpp"
 
 using namespace mlir;
+
 class visitor : public qasmBaseVisitor {
 public:
     // Return the symbol table.
-    ScopedSymbolTable* getScopedSymbolTable() { return &symbol_table; }
+    ScopedSymbolTable *getScopedSymbolTable() { return &symbol_table; }
 
     // The constructor, instantiates commonly used opaque types
-    visitor(mlir::OpBuilder b, mlir::ModuleOp m, std::string &fname);
+     visitor(mlir::OpBuilder b, mlir::ModuleOp m, std::string &fname);
+
+    ~visitor();
 
     // Visit nodes corresponding to quantum variable and gate declarations.
     // see visitor_handlers/quantum_types_handler.cpp for implementation
-    antlrcpp::Any visitQuantumGateDefinition(
+    std::any visitQuantumGateDefinition(
             qasmParser::QuantumGateDefinitionContext *context) override;
 
-    antlrcpp::Any visitQuantumDeclaration(
+    std::any visitQuantumDeclaration(
             qasmParser::QuantumDeclarationContext *context) override;
 
     // see visitor_handlers/quantum_instruction_handler.cpp
-    antlrcpp::Any visitQuantumGateCall(
+    std::any visitQuantumGateCall(
             qasmParser::QuantumGateCallContext *context) override;
 
     // see visitor_handlers/measurement_handler.cpp
-    antlrcpp::Any visitQuantumMeasurement(
+    std::any visitQuantumMeasurement(
             qasmParser::QuantumMeasurementContext *context) override;
 
-    antlrcpp::Any visitQuantumMeasurementAssignment(
+    std::any visitQuantumMeasurementAssignment(
             qasmParser::QuantumMeasurementAssignmentContext *context) override;
 
     // see visitor_handlers/classical_types_handler.cpp
-    antlrcpp::Any visitSingleDesignatorDeclaration(
+    std::any visitSingleDesignatorDeclaration(
             qasmParser::SingleDesignatorDeclarationContext *context) override;
 
-    antlrcpp::Any visitNoDesignatorDeclaration(
+    std::any visitNoDesignatorDeclaration(
             qasmParser::NoDesignatorDeclarationContext *context) override;
 
-    antlrcpp::Any visitBitDeclaration(
+    std::any visitBitDeclaration(
             qasmParser::BitDeclarationContext *context) override;
 
 //        // QCOR_EXPECT_TRUE handler
-//        antlrcpp::Any visitQcor_test_statement(
+//        std::any visitQcor_test_statement(
 //                qasmParser::Qcor_test_statementContext *context) override;
 
-    antlrcpp::Any visitPragma(qasmParser::PragmaContext *ctx) override {
+    std::any visitPragma(qasmParser::PragmaContext *ctx) override {
       // Handle the #pragma { export; } directive
       // Mark the export bool flag so that the later sub-routine handler will pick it up.
       if (ctx->statement().size() == 1 && ctx->statement(0)->getText() == "export;") {
@@ -61,6 +64,424 @@ public:
         return visitChildren(ctx);
       }
     }
+
+    std::any visitProgram(qasmParser::ProgramContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitHeader(qasmParser::HeaderContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitVersion(qasmParser::VersionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitInclude(qasmParser::IncludeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitIoIdentifier(qasmParser::IoIdentifierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitIo(qasmParser::IoContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitGlobalStatement(qasmParser::GlobalStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitStatement(qasmParser::StatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumDeclarationStatement(qasmParser::QuantumDeclarationStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitClassicalDeclarationStatement(qasmParser::ClassicalDeclarationStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitClassicalAssignment(qasmParser::ClassicalAssignmentContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitAssignmentStatement(qasmParser::AssignmentStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitReturnSignature(qasmParser::ReturnSignatureContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitDesignator(qasmParser::DesignatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitIdentifierList(qasmParser::IdentifierListContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumArgument(qasmParser::QuantumArgumentContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumArgumentList(qasmParser::QuantumArgumentListContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBitType(qasmParser::BitTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitSingleDesignatorType(qasmParser::SingleDesignatorTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitNoDesignatorType(qasmParser::NoDesignatorTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitNonArrayType(qasmParser::NonArrayTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitArrayType(qasmParser::ArrayTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any
+    visitArrayReferenceTypeDimensionSpecifier(qasmParser::ArrayReferenceTypeDimensionSpecifierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitArrayReferenceType(qasmParser::ArrayReferenceTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitClassicalType(qasmParser::ClassicalTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitNumericType(qasmParser::NumericTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitConstantDeclaration(qasmParser::ConstantDeclarationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitComplexDeclaration(qasmParser::ComplexDeclarationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitArrayInitializer(qasmParser::ArrayInitializerContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitArrayDeclaration(qasmParser::ArrayDeclarationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitClassicalDeclaration(qasmParser::ClassicalDeclarationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitClassicalTypeList(qasmParser::ClassicalTypeListContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitClassicalArgument(qasmParser::ClassicalArgumentContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitClassicalArgumentList(qasmParser::ClassicalArgumentListContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitAnyTypeArgument(qasmParser::AnyTypeArgumentContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitAnyTypeArgumentList(qasmParser::AnyTypeArgumentListContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitAliasStatement(qasmParser::AliasStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitAliasInitializer(qasmParser::AliasInitializerContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitRangeDefinition(qasmParser::RangeDefinitionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumGateSignature(qasmParser::QuantumGateSignatureContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumGateName(qasmParser::QuantumGateNameContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumBlock(qasmParser::QuantumBlockContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumLoop(qasmParser::QuantumLoopContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumLoopBlock(qasmParser::QuantumLoopBlockContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumStatement(qasmParser::QuantumStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumInstruction(qasmParser::QuantumInstructionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumPhase(qasmParser::QuantumPhaseContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumReset(qasmParser::QuantumResetContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumBarrier(qasmParser::QuantumBarrierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitQuantumGateModifier(qasmParser::QuantumGateModifierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitPowModifier(qasmParser::PowModifierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitCtrlModifier(qasmParser::CtrlModifierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitUnaryOperator(qasmParser::UnaryOperatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitComparisonOperator(qasmParser::ComparisonOperatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitEqualityOperator(qasmParser::EqualityOperatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitLogicalOperator(qasmParser::LogicalOperatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitExpressionStatement(qasmParser::ExpressionStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitExpression(qasmParser::ExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitLogicalAndExpression(qasmParser::LogicalAndExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBitOrExpression(qasmParser::BitOrExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitXOrExpression(qasmParser::XOrExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBitAndExpression(qasmParser::BitAndExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitComparisonExpression(qasmParser::ComparisonExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBitShiftExpression(qasmParser::BitShiftExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitAdditiveExpression(qasmParser::AdditiveExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitMultiplicativeExpression(qasmParser::MultiplicativeExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitUnaryExpression(qasmParser::UnaryExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitPowerExpression(qasmParser::PowerExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitIndexOperator(qasmParser::IndexOperatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitIndexExpression(qasmParser::IndexExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitIndexedIdentifier(qasmParser::IndexedIdentifierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitExpressionTerminator(qasmParser::ExpressionTerminatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBooleanLiteral(qasmParser::BooleanLiteralContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBuiltInCall(qasmParser::BuiltInCallContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBuiltInMath(qasmParser::BuiltInMathContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitCastOperator(qasmParser::CastOperatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitExpressionList(qasmParser::ExpressionListContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitEqualsExpression(qasmParser::EqualsExpressionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitAssignmentOperator(qasmParser::AssignmentOperatorContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitDiscreteSet(qasmParser::DiscreteSetContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitSetDeclaration(qasmParser::SetDeclarationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitProgramBlock(qasmParser::ProgramBlockContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitBranchingStatement(qasmParser::BranchingStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitLoopSignature(qasmParser::LoopSignatureContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitLoopStatement(qasmParser::LoopStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitEndStatement(qasmParser::EndStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitReturnStatement(qasmParser::ReturnStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitControlDirective(qasmParser::ControlDirectiveContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitExternDeclaration(qasmParser::ExternDeclarationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitExternOrSubroutineCall(qasmParser::ExternOrSubroutineCallContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitSubroutineDefinition(qasmParser::SubroutineDefinitionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitSubroutineBlock(qasmParser::SubroutineBlockContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitTimingType(qasmParser::TimingTypeContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitTimingBox(qasmParser::TimingBoxContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitTimingIdentifier(qasmParser::TimingIdentifierContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitTimingInstructionName(qasmParser::TimingInstructionNameContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitTimingInstruction(qasmParser::TimingInstructionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitTimingStatement(qasmParser::TimingStatementContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitCalibration(qasmParser::CalibrationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitCalibrationGrammarDeclaration(qasmParser::CalibrationGrammarDeclarationContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitCalibrationDefinition(qasmParser::CalibrationDefinitionContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitCalibrationGrammar(qasmParser::CalibrationGrammarContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
+    std::any visitCalibrationArgumentList(qasmParser::CalibrationArgumentListContext *ctx) override {
+      return visitChildren(ctx);
+    }
+
 
     // This function serves as a utility for creating a MemRef and
     // corresponding AllocOp of a given 1d shape.

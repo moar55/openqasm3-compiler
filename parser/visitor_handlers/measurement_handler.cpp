@@ -1,11 +1,11 @@
 #include "../visitor.hpp"
 
-antlrcpp::Any visitor::visitQuantumMeasurement(
+std::any visitor::visitQuantumMeasurement(
         qasmParser::QuantumMeasurementContext* context)  {
-  return {}:
+  return {};
 }
 
-antlrcpp::Any visitor::visitQuantumMeasurementAssignment(
+std::any visitor::visitQuantumMeasurementAssignment(
         qasmParser::QuantumMeasurementAssignmentContext* context) {
-  return {}:
+  return {};
 }

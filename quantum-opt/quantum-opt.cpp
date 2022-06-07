@@ -12,12 +12,13 @@ mlir::ModuleOp m_module;
 using namespace antlr4;
 
 int main() {
+  std::string hi = "heye";
   std::string qasm_src = R"#(OPENQASM3;
     qubit q;
     h q;
     c = measure q;
   )#";
-  mlir::MLIRContext* context = new mlir::MLIRContext;
+  auto context = std::make_unique<mlir::MLIRContext>();
   context->loadDialect<mlir::quantum::QuantumDialect, mlir::memref::MemRefDialect>();
   std::shared_ptr<MLIRGenerator> mlir_generator = std::make_shared<MLIRGenerator>(*context);
   mlir_generator->mlirgen(qasm_src);
