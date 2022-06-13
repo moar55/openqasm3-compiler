@@ -16,8 +16,9 @@ target_link_libraries(quantum-opt
         MLIRQuantum
         MLIRMemRef
         MLIRIR
+        MLIRArithmetic
         MLIRParser
-        MLIRFunc
+        MLIRFuncTransforms
         MLIRSideEffectInterfaces
         MLIRTransforms
         generator
