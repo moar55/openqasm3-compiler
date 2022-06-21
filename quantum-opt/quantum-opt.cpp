@@ -13,6 +13,7 @@
 int main(int argc, char **argv) {
   std::string qasm_src = R"#(OPENQASM3;
     qubit q;
+    bit c;
     h q;
     c = measure q;
   )#";

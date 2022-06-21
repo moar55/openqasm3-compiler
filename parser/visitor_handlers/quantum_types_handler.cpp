@@ -14,6 +14,7 @@ std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext 
   mlir::Value pos = builder.create<mlir::arith::ConstantOp>(builder.getUnknownLoc(), integer_attr, integer_type);
   allocation = builder.create<mlir::quantum::ExtractQubitOp>(
           builder.getUnknownLoc(), qubit_type, allocation, pos);
+  symbol_table.add_symbol(var_name, allocation);
   return {};
 
 

@@ -221,9 +221,13 @@ quantumGateSignature
 quantumGateName
     : 'U'
     | 'CX'
+    | 'H'
+    | 'X'
+    | 'Y'
+    | 'Z'
     | 'PT3'
     | 'PT4'
-    | Identifier
+//    | Identifier
     ;
 
 quantumBlock

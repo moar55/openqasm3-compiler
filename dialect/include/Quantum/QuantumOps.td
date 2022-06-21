@@ -10,13 +10,11 @@ def ArrayType : OpaqueType<"quantum", "Array", "opaque array type">;
 def QallocOp : QuantumOp<"qalloc", []> {
     let arguments = (ins AnyI64Attr:$size, StrAttr:$name);
     let results = (outs ArrayType:$qubits);
-
 }
 
 def ExtractQubitOp : QuantumOp<"qextract", []> {
     let arguments = (ins ArrayType:$qreg, AnyInteger:$idx);
     let results = (outs QubitType:$qbit);
-
 }
 
 def GeneralArrayExtractOp : QuantumOp<"array_extract", []> {
