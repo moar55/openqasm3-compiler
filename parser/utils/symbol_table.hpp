@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <map>
 #include <vector>
@@ -5,7 +6,6 @@
 
 #include "Quantum/QuantumOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/BuiltinTypes.h"

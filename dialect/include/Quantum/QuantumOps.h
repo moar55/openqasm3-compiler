@@ -5,16 +5,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-
-#ifndef QUANTUM_QUANTUMOPS_H
-#define QUANTUM_QUANTUMOPS_H
-
-#include "mlir/IR/BuiltinTypes.h"
-#include "mlir/IR/Dialect.h"
-#include "mlir/IR/OpDefinition.h"
-#include "mlir/Interfaces/SideEffectInterfaces.h"
+#pragma once
+#include "QuantumDialect.h"
 //`
 #define GET_OP_CLASSES
 #include "Quantum/QuantumOps.h.inc"
-
-#endif // QUANTUM_QUANTUMOPS_H

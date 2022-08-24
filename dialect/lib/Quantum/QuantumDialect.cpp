@@ -9,7 +9,6 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/OpImplementation.h"
 
-#include "Quantum/QuantumDialect.h"
 #include "Quantum/QuantumOps.h"
 
 using namespace mlir;

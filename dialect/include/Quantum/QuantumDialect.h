@@ -5,15 +5,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#ifndef QUANTUM_QUANTUMDIALECT_H
-#define QUANTUM_QUANTUMDIALECT_H
-
+#pragma once
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/BuiltinOps.h"
+#include "mlir/IR/OpDefinition.h"
 #include "mlir/IR/BuiltinDialect.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/Interfaces/SideEffectInterfaces.h"
 
 #include "Quantum/QuantumOpsDialect.h.inc"
-
-#endif // QUANTUM_QUANTUMDIALECT_H

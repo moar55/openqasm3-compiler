@@ -36,4 +36,17 @@ def DeallocOp : QuantumOp<"dealloc", []> {
     let arguments = (ins ArrayType:$qubits);
     let results = (outs);
 }
+
+def IntegerCastOp : QuantumOp<"integerCast", []> {
+    let arguments = (ins AnyInteger:$input);
+    let results = (outs AnyInteger:$output);
+}
+
+
+def ResultCastOp : QuantumOp<"resultCast", []> {
+    let arguments = (ins ResultType:$measure_result);
+    let results = (outs I1:$bit_result);
+}
+
+
 #endif // Quantum_OPS
