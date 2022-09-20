@@ -1,5 +1,5 @@
 #include "../visitor.hpp"
-#include "Quantum/QuantumOps.h"
+#include "Quantum/IR/QuantumOps.h"
 
 std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *context) {
   auto qgn = context->quantumGateName();

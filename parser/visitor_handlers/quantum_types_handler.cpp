@@ -1,5 +1,5 @@
 #include "../visitor.hpp"
-#include "Quantum/QuantumOps.h"
+#include "Quantum/IR/QuantumOps.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 
 std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext *context) {

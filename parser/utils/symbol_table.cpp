@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "exprtk.hpp"
-#include "Quantum/QuantumOps.h"
+#include "Quantum/IR/QuantumOps.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/BuiltinTypes.h"
@@ -75,26 +75,26 @@ std::string &replace_val(std::string &s, const std::string &from, const std::str
       s.replace(pos, from.size(), to);
   return s;
 }
-
-int64_t ScopedSymbolTable::evaluate_constant_integer_expression(
-        const std::string expr_str) {
-  //  replace any ** with ^
-  std::string replaced_string = "**";
-  std::string replacement = "^";
-  auto new_str = replace_val((std::string &) expr_str, replaced_string, replacement);
-
-  const std::optional<int64_t> try_eval =
-          try_evaluate_constant_integer_expression(new_str);
-  double ref = 0.0;
-  if (try_eval.has_value()) {
-    ref = try_eval.value();
-  } else {
-    std::cout << "err" << "Failed to evaluate constant integer expression: " +
-                          expr_str + ". Must be a constant integer type." << std::endl;
-  }
-
-  return (int64_t) ref;
-}
+//
+//int64_t ScopedSymbolTable::evaluate_constant_integer_expression(
+//        const std::string expr_str) {
+//  //  replace any ** with ^
+//  std::string replaced_string = "**";
+//  std::string replacement = "^";
+//  auto new_str = replace_val((std::string &) expr_str, replaced_string, replacement);
+//
+//  const std::optional<int64_t> try_eval =
+//          try_evaluate_constant_integer_expression(new_str);
+//  double ref = 0.0;
+//  if (try_eval.has_value()) {
+//    ref = try_eval.value();
+//  } else {
+//    std::cout << "err" << "Failed to evaluate constant integer expression: " +
+//                          expr_str + ". Must be a constant integer type." << std::endl;
+//  }
+//
+//  return (int64_t) ref;
+//}
 
 //    void ScopedSymbolTable::evaluate_const_global(const std::string variable_name,
 //                                                  const std::string expr_str,

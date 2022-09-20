@@ -4,7 +4,7 @@
 #include <vector>
 #include <optional>
 
-#include "Quantum/QuantumOps.h"
+#include "Quantum/IR/QuantumOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"

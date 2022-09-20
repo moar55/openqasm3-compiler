@@ -1,4 +1,4 @@
-set(LLVM_ENABLE_RTTI ON)
+#set(LLVM_ENABLE_RTTI ON)
 add_llvm_executable(quantum-opt quantum-opt.cpp)
 #add_llvm_executable(quantum-opt quantum-opt.cpp)
 llvm_update_compile_flags(quantum-opt)
@@ -7,20 +7,23 @@ target_include_directories(quantum-opt
         PRIVATE
         ${ANTLR4_INCLUDE_DIRS}
         ../parser
+        ../dialect/lib
 #        ../parser/generated
         )
 
 target_link_libraries(quantum-opt
         PRIVATE
         MLIRAnalysis
-        MLIRQuantum
         MLIRMemRef
         MLIRIR
         MLIRArithmetic
         MLIRParser
+        MLIRPass
+        MLIRRewrite
         MLIRFuncTransforms
         MLIRSideEffectInterfaces
         MLIRTransforms
+        hoba
         generator
         )
 

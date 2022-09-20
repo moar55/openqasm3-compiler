@@ -1,16 +1,12 @@
-//===- StandaloneOps.cpp - Standalone dialect ops ---------------*- C++ -*-===//
+//===- StandaloneOps.h - Standalone dialect ops -----------------*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-
-
-#include "Quantum/IR/QuantumOps.h"
-#include "mlir/IR/OpImplementation.h"
-#include "mlir/IR/Builders.h"
-#include "mlir/IR/TypeUtilities.h"
-
+#pragma once
+#include "QuantumDialect.h"
+//`
 #define GET_OP_CLASSES
-#include "Quantum/QuantumOps.cpp.inc"
+#include "Quantum/QuantumOps.h.inc"

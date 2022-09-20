@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "Quantum/QuantumOps.h"
+#include "Quantum/IR/QuantumOps.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
@@ -27,7 +27,6 @@ protected:
     mlir::ModuleOp m_module;
     mlir::OpBuilder builder;
     std::vector<std::string> function_names;
-
     std::string file_name = "main";
     bool add_entry_point = true;
     bool add_custom_return = false;
@@ -43,6 +42,7 @@ public:
     MLIRGenerator(mlir::OpBuilder b, mlir::MLIRContext& ctx)
             : context(ctx), builder(b) {
       m_module = mlir::ModuleOp::create(builder.getUnknownLoc());
+//      m_module.getOps<>()
     }
 
     void initialize_mlirgen(const std::string entry_function_name);
@@ -50,6 +50,10 @@ public:
 
     mlir::OwningOpRef<mlir::ModuleOp> get_module() {
       return mlir::OwningOpRef<mlir::ModuleOp>(mlir::OwningOpRef<mlir::ModuleOp>(m_module));
+    }
+
+    mlir::OpBuilder get_builder() {
+      return builder;
     }
 
     std::vector<std::string> seen_function_names() { return function_names; }

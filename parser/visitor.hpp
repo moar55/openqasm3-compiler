@@ -531,6 +531,8 @@ protected:
     ScopedSymbolTable symbol_table;
     mlir::ModuleOp m_module;
     std::string file_name = "";
+
+
     bool enable_nisq_ifelse = false;
 
     // Reference to MLIR Quantum Opaque Types

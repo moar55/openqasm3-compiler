@@ -7,10 +7,11 @@
 //===----------------------------------------------------------------------===//
 
 
-#include "Quantum/IR/QuantumOps.h"
+#include "RestrictedQuantum/RestrictedQuantumOps.h"
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/TypeUtilities.h"
 
 #define GET_OP_CLASSES
-#include "Quantum/QuantumOps.cpp.inc"
+#include "RestrictedQuantum/RestrictedQuantumOps.cpp.inc"
+#include "Quantum/Transforms/Passes.h.inc"
