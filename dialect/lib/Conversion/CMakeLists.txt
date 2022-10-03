@@ -6,8 +6,8 @@ add_mlir_library(RestQuantumMLIRConversionPass
 
         LINK_COMPONENTS
         Core
-
         LINK_LIBS PUBLIC
-        ${linked_libs}
-        #${torch_mlir_conversion_libs}
+        MLIRIR
+        MLIRPass
+        MLIRTransforms
         )

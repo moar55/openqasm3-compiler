@@ -16,20 +16,13 @@ public :
 
     LogicalResult matchAndRewrite(quantum::ValueSemanticsInstOp op, OpAdaptor adaptor,
                                   ConversionPatternRewriter &rewriter) const override{
-      std::cout<<"hello"<<std::endl;
-      Location loc = op->getLoc();
-      std::vector<mlir::Value> qubits, params;
-      qubits = std::vector<mlir::Value>{op->getOperand(0)};
-      auto inst = rewriter.create<restquantum::RxOp>(loc, llvm::makeArrayRef(std::vector<mlir::Type>{mlir::Type{}})
-              , llvm::makeArrayRef(qubits), llvm::makeArrayRef(params));
-      rewriter.replaceOp(op, inst.getResult(0));
+      const mlir::Value operand = op.getOperand(0);
+      rewriter.replaceOpWithNewOp<restquantum::RxOp>(op, llvm::makeArrayRef(operand.getType()),
+                                                     llvm::makeArrayRef(operand), llvm::makeArrayRef(std::vector<mlir::Value>{}));
       return success();
     }
 };
 
-//void hoba() {
-//  auto x = new ConvertInstBase
-//}
 class ConvertInst
 : public quantum::ConvertInstBase<ConvertInst> {
 public:
@@ -38,6 +31,7 @@ public:
       ConversionTarget target(*context);
       target.addLegalDialect<memref::MemRefDialect,arith::ArithmeticDialect, quantum::QuantumDialect, restquantum::RestrictedQuantumDialect>();
       TypeConverter typeConverter;
+      typeConverter.addConversion([](Type type) {return type;});
       RewritePatternSet patterns(context);
       target.addIllegalOp<quantum::ValueSemanticsInstOp>();
       patterns.add<ConvertInstRewrite>(typeConverter, context);

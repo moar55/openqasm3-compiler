@@ -2,10 +2,7 @@
 #define Restricted_Quantum_OPS
 
 include "RestrictedQuantumDialect.td"
-
-def QubitType : OpaqueType<"restquantum", "Qubit", "opaque qubit type">;
-def ResultType : OpaqueType<"restquantum", "Result", "opaque result type">;
-def ArrayType : OpaqueType<"restquantum", "Array", "opaque array type">;
+include "Quantum/IR/QuantumTypes.td"
 
 def QallocOp : RestrictedQuantumOp<"qalloc", []> {
     let arguments = (ins AnyI64Attr:$size, StrAttr:$name);

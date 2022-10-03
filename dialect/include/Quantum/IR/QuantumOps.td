@@ -2,10 +2,7 @@
 #define Quantum_OPS
 
 include "QuantumDialect.td"
-
-def QubitType : OpaqueType<"quantum", "Qubit", "opaque qubit type">;
-def ResultType : OpaqueType<"quantum", "Result", "opaque result type">;
-def ArrayType : OpaqueType<"quantum", "Array", "opaque array type">;
+include "QuantumTypes.td"
 
 def QallocOp : QuantumOp<"qalloc", []> {
     let arguments = (ins AnyI64Attr:$size, StrAttr:$name);

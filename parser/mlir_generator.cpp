@@ -12,8 +12,11 @@
 
 #include "visitor.hpp"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 #include "generated/qasmLexer.h"
 #include "generated/qasmParser.h"
+
+using namespace mlir;
 
 void MLIRGenerator::initialize_mlirgen(
         const std::string entry_function_name) {
@@ -22,13 +25,13 @@ void MLIRGenerator::initialize_mlirgen(
   StringAttr n = StringAttr::get(&context, name); // namespace
   auto int_type = builder.getI32Type();
   auto argv_type =
-          mlir::OpaqueType::get(n, llvm::StringRef("ArgvType"));
-  std::vector<mlir::Type> arg_types_vec{int_type, argv_type};
+          OpaqueType::get(n, llvm::StringRef("ArgvType"));
+  std::vector<Type> arg_types_vec{int_type, argv_type};
   auto func_type =
           builder.getFunctionType(llvm::makeArrayRef(arg_types_vec), int_type);
   auto proto =
-          mlir::func::FuncOp::create(builder.getUnknownLoc(), entry_function_name, func_type);
-  mlir::func::FuncOp function(proto);
+          func::FuncOp::create(builder.getUnknownLoc(), entry_function_name, func_type);
+  func::FuncOp function(proto);
   auto &entryBlock = *function.addEntryBlock();
   builder.setInsertionPointToStart(&entryBlock);
   m_module.push_back(function);
@@ -46,9 +49,9 @@ void MLIRGenerator::mlirgen(const std::string &src) {
 
 
   ANTLRInputStream input(src);
-  mlir::qasmLexer lexer(&input);
+  qasmLexer lexer(&input);
   CommonTokenStream tokens(&lexer);
-  mlir::qasmParser parser(&tokens);
+  qasmParser parser(&tokens);
 
   class Qasm3ParserErrorListener : public BaseErrorListener {
   private:
@@ -80,7 +83,9 @@ void MLIRGenerator::mlirgen(const std::string &src) {
   // Get the parse tree and visit
   tree::ParseTree *tree = parser.program();
   my_visitor->visitChildren(tree);
-
-  return;
+  IntegerType i32 = builder.getI32Type();
+  IntegerAttr return_attr = IntegerAttr::get(i32, 0);
+  Value return_op = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), return_attr, i32);
+  builder.create<func::ReturnOp>(builder.getUnknownLoc(), return_op);
 }
 

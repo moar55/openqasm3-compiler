@@ -64,14 +64,14 @@ mlir::Value get_or_extract_qubit(const std::string &qreg_name,
       return qubit_value;
     }
   } else {
-    auto qubits = symbol_table.get_symbol(qreg_name);
-    mlir::Value pos = get_or_create_constant_integer_value(
-            idx, location, builder.getI64Type(), symbol_table, builder);
-    auto value = builder.create<mlir::quantum::ExtractQubitOp>(
-            location, get_custom_opaque_type("Qubit", builder.getContext()), qubits,
-            pos);
-    symbol_table.add_symbol(key, value);
-    return value;
+    auto qubit = symbol_table.get_symbol(qreg_name);
+//    mlir::Value pos = get_or_create_constant_integer_value(
+//            idx, location, builder.getI64Type(), symbol_table, builder);
+//    auto value = builder.create<mlir::quantum::ExtractQubitOp>(
+//            location, get_custom_opaque_type("Qubit", builder.getContext()), qubits,
+//            pos);
+//    symbol_table.add_symbol(key, value);
+    return qubit;
   }
 }
 

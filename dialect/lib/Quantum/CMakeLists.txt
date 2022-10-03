@@ -6,6 +6,7 @@ add_mlir_library(MLIRQuantum
 
         DEPENDS
         MLIRQuantumOpsIncGen
+        MLIRQuantumTypesIncGen
 
         LINK_LIBS PUBLIC
         MLIRIR

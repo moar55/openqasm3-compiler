@@ -9,8 +9,6 @@ add_mlir_library(hoba
         Core
 
         LINK_LIBS PUBLIC
-        MLIRIR
-        MLIRMemRef
         MLIRQuantum
         MLIRRestrictedQuantum
         RestQuantumMLIRConversionPass
