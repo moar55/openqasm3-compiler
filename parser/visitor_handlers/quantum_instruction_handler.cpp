@@ -3,6 +3,7 @@
 
 std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *context) {
   auto qgn = context->quantumGateName();
+  std::cout << "gate name" << qgn->getText() << std::endl;
   auto qbit_var_name = context->indexedIdentifier().front()->Identifier()->getText();
   std::vector<mlir::Value> qubits, params;
   qubits = std::vector<mlir::Value>{symbol_table.get_symbol(qbit_var_name)};

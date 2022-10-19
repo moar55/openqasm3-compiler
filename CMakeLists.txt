@@ -7,8 +7,8 @@ endif()
 
 project(openqasm3-compiler)
 
-# compiler must be 17
-set(CMAKE_CXX_STANDARD 17)
+    # compiler must be 17
+    set(CMAKE_CXX_STANDARD 17)
 
 
 #ANTLR

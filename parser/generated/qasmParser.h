@@ -28,13 +28,14 @@ public:
     T__74 = 75, T__75 = 76, T__76 = 77, T__77 = 78, T__78 = 79, T__79 = 80, 
     T__80 = 81, T__81 = 82, T__82 = 83, T__83 = 84, T__84 = 85, T__85 = 86, 
     T__86 = 87, T__87 = 88, T__88 = 89, T__89 = 90, T__90 = 91, T__91 = 92, 
-    LBRACKET = 93, RBRACKET = 94, LBRACE = 95, RBRACE = 96, LPAREN = 97, 
-    RPAREN = 98, COLON = 99, SEMICOLON = 100, DOT = 101, COMMA = 102, EQUALS = 103, 
-    ARROW = 104, PLUS = 105, MINUS = 106, MUL = 107, DIV = 108, MOD = 109, 
-    IMAG = 110, ImagNumber = 111, COMPLEX = 112, HASH = 113, CONST = 114, 
-    MUTABLE = 115, ARRAY = 116, SIZEOF = 117, DIM = 118, Constant = 119, 
-    Whitespace = 120, Newline = 121, Integer = 122, Identifier = 123, RealNumber = 124, 
-    TimingLiteral = 125, StringLiteral = 126, LineComment = 127, BlockComment = 128
+    T__92 = 93, T__93 = 94, T__94 = 95, T__95 = 96, LBRACKET = 97, RBRACKET = 98, 
+    LBRACE = 99, RBRACE = 100, LPAREN = 101, RPAREN = 102, COLON = 103, 
+    SEMICOLON = 104, DOT = 105, COMMA = 106, EQUALS = 107, ARROW = 108, 
+    PLUS = 109, MINUS = 110, MUL = 111, DIV = 112, MOD = 113, IMAG = 114, 
+    ImagNumber = 115, COMPLEX = 116, HASH = 117, CONST = 118, MUTABLE = 119, 
+    ARRAY = 120, SIZEOF = 121, DIM = 122, Constant = 123, Whitespace = 124, 
+    Newline = 125, Integer = 126, Identifier = 127, RealNumber = 128, TimingLiteral = 129, 
+    StringLiteral = 130, LineComment = 131, BlockComment = 132
   };
 
   enum {
@@ -1014,7 +1015,6 @@ public:
   public:
     QuantumGateNameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *Identifier();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

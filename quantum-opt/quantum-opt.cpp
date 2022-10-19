@@ -58,11 +58,12 @@ using namespace mlir;
 //};
 
 int main(int argc, char **argv) {
-  std::string qasm_src = R"#(OPENQASM3;
+  std::string qasm_src = R"#(
+    OPENQASM3;
     qubit q;
     bit c;
-    h q;
-  )#";
+    Z q;
+    )#";
   auto context = std::make_unique<MLIRContext>();
   context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithmeticDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
   std::shared_ptr<MLIRGenerator> mlir_generator = std::make_shared<MLIRGenerator>(*context);
