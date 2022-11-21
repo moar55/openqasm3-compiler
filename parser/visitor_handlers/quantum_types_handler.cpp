@@ -1,21 +1,38 @@
 #include "../visitor.hpp"
 #include "Quantum/IR/QuantumOps.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "expression_handler.h"
+
+
+using namespace mlir;
 
 std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext *context) {
-  auto integer_type = builder.getI64Type();
-  auto integer_attr = mlir::IntegerAttr::get(integer_type, 10);
-  auto var_name = context->Identifier()->getText();
-  auto str_attr = builder.getStringAttr(var_name);
+  //TODO: disallow non const expressions for designator
+  std::string var_name = context->Identifier()->getText();
+  StringAttr str_attr = builder.getStringAttr(var_name);
+  int64_t size = 1;
+  if (context->designator()) {
+    IntegerType  type = builder.getIntegerType(64);
+    auto generator = qasm_expression_generator(builder, symbol_table, type);
+    generator.visitExpression(context->designator()->expression());
+    auto defining_op = generator.current_value.getDefiningOp<arith::ConstantOp>();
+    size = defining_op.getValue().cast<IntegerAttr>().getInt();
+  }
+  IntegerType integer_type = builder.getI64Type();
+  IntegerAttr integer_attr = IntegerAttr::get(integer_type, size);
+
   mlir::Value allocation = builder.create<mlir::quantum::QallocOp>(
           builder.getUnknownLoc(), array_type, integer_attr, str_attr);
 
-  integer_attr = mlir::IntegerAttr::get(integer_type, 0);
-  mlir::Value pos = builder.create<mlir::arith::  ConstantOp>(builder.getUnknownLoc(), integer_attr, integer_type);
-  allocation = builder.create<mlir::quantum::ExtractQubitOp>(
+  if (size == 1) {
+    integer_attr = IntegerAttr::get(integer_type, size);
+    Value pos = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), integer_attr, integer_type);
+    allocation = builder.create<quantum::ExtractQubitOp>(
           builder.getUnknownLoc(), qubit_type, allocation, pos);
+  }
   symbol_table.add_symbol(var_name, allocation);
   return {};
+}
 
 
 //  auto line = context->getStart()->getLine();
@@ -96,7 +113,7 @@ std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext 
 //    size = 1;
 //  }
 //  return {};
-}
+//}
 
 std::any visitor::visitQuantumGateDefinition(qasmParser::QuantumGateDefinitionContext *context) {
   std::cout<< "In there boooi"<<std::endl;

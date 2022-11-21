@@ -28,14 +28,14 @@ public:
     T__74 = 75, T__75 = 76, T__76 = 77, T__77 = 78, T__78 = 79, T__79 = 80, 
     T__80 = 81, T__81 = 82, T__82 = 83, T__83 = 84, T__84 = 85, T__85 = 86, 
     T__86 = 87, T__87 = 88, T__88 = 89, T__89 = 90, T__90 = 91, T__91 = 92, 
-    T__92 = 93, T__93 = 94, T__94 = 95, T__95 = 96, LBRACKET = 97, RBRACKET = 98, 
-    LBRACE = 99, RBRACE = 100, LPAREN = 101, RPAREN = 102, COLON = 103, 
-    SEMICOLON = 104, DOT = 105, COMMA = 106, EQUALS = 107, ARROW = 108, 
-    PLUS = 109, MINUS = 110, MUL = 111, DIV = 112, MOD = 113, IMAG = 114, 
-    ImagNumber = 115, COMPLEX = 116, HASH = 117, CONST = 118, MUTABLE = 119, 
-    ARRAY = 120, SIZEOF = 121, DIM = 122, Constant = 123, Whitespace = 124, 
-    Newline = 125, Integer = 126, Identifier = 127, RealNumber = 128, TimingLiteral = 129, 
-    StringLiteral = 130, LineComment = 131, BlockComment = 132
+    T__92 = 93, T__93 = 94, T__94 = 95, T__95 = 96, T__96 = 97, T__97 = 98, 
+    T__98 = 99, LBRACKET = 100, RBRACKET = 101, LBRACE = 102, RBRACE = 103, 
+    LPAREN = 104, RPAREN = 105, COLON = 106, SEMICOLON = 107, DOT = 108, 
+    COMMA = 109, EQUALS = 110, ARROW = 111, PLUS = 112, MINUS = 113, MUL = 114, 
+    DIV = 115, MOD = 116, IMAG = 117, ImagNumber = 118, COMPLEX = 119, HASH = 120, 
+    CONST = 121, MUTABLE = 122, ARRAY = 123, SIZEOF = 124, DIM = 125, Constant = 126, 
+    Whitespace = 127, Newline = 128, Integer = 129, Identifier = 130, RealNumber = 131, 
+    TimingLiteral = 132, StringLiteral = 133, LineComment = 134, BlockComment = 135
   };
 
   enum {

@@ -1,59 +1,48 @@
-/*******************************************************************************
- * Copyright (c) 2018-, UT-Battelle, LLC.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the BSD 3-Clause License
- * which accompanies this distribution.
- *
- * Contributors:
- *   Alexander J. McCaskey - initial API and implementation
- *   Thien Nguyen - implementation
- *******************************************************************************/
-#include "qasm_utils.hpp"
+
 #include "antlr4-runtime.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "symbol_table.hpp"
 
-namespace qcor {
+void printErrorMessage(const std::string msg, bool do_exit) {
+  std::cout << "\n[OPENQASM3 MLIRGen] Error\n" << msg << "\n\n";
+  exit(1);
+}
 
-    void printErrorMessage(const std::string msg, bool do_exit) {
-      std::cout << "\n[OPENQASM3 MLIRGen] Error\n" << msg << "\n\n";
-      if (do_exit) exit(1);
-    }
+void printErrorMessage(const std::string msg,
+                       antlr4::ParserRuleContext *context, bool do_exit) {
+  auto line = context->getStart()->getLine();
+  auto col = context->getStart()->getCharPositionInLine();
+  std::cout << "\n[OPENQASM3 MLIRGen] Error at " << line << ":" << col << "\n"
+            << "   AntlrText: " << context->getText() << "\n"
+            << "   " << msg << "\n\n";
+  if (do_exit) exit(1);
+}
 
-    void printErrorMessage(const std::string msg,
-                           antlr4::ParserRuleContext* context, bool do_exit) {
-      auto line = context->getStart()->getLine();
-      auto col = context->getStart()->getCharPositionInLine();
-      std::cout << "\n[OPENQASM3 MLIRGen] Error at " << line << ":" << col << "\n"
-                << "   AntlrText: " << context->getText() << "\n"
-                << "   " << msg << "\n\n";
-      if (do_exit) exit(1);
-    }
-    void printErrorMessage(const std::string msg,
-                           antlr4::ParserRuleContext* context,
-                           std::vector<mlir::Value>&& v, bool do_exit) {
-      auto line = context->getStart()->getLine();
-      auto col = context->getStart()->getCharPositionInLine();
-      std::cout << "\n[OPENQASM3 MLIRGen] Error at " << line << ":" << col << "\n"
-                << "   AntlrText: " << context->getText() << "\n"
-                << "   " << msg << "\n\n";
-      std::cout << "MLIR Values:\n";
-      for (auto vv : v) vv.dump();
+void printErrorMessage(const std::string msg,
+                       antlr4::ParserRuleContext *context,
+                       std::vector<mlir::Value> &&v, bool do_exit) {
+  auto line = context->getStart()->getLine();
+  auto col = context->getStart()->getCharPositionInLine();
+  std::cout << "\n[OPENQASM3 MLIRGen] Error at " << line << ":" << col << "\n"
+            << "   AntlrText: " << context->getText() << "\n"
+            << "   " << msg << "\n\n";
+  std::cout << "MLIR Values:\n";
+  for (auto vv: v) vv.dump();
 
-      if (do_exit) exit(1);
-    }
+  if (do_exit) exit(1);
+}
 
-    void printErrorMessage(const std::string msg, mlir::Value v) {
-      printErrorMessage(msg, false);
-      v.dump();
-      exit(1);
-    }
+void printErrorMessage(const std::string msg, mlir::Value v) {
+  printErrorMessage(msg, false);
+  v.dump();
+  exit(1);
+}
 
-    void printErrorMessage(const std::string msg, std::vector<mlir::Value>&& v) {
-      printErrorMessage(msg, false);
-      for (auto vv : v) vv.dump();
-      exit(1);
-    }
+void printErrorMessage(const std::string msg, std::vector<mlir::Value> &&v) {
+  printErrorMessage(msg, false);
+  for (auto vv: v) vv.dump();
+  exit(1);
+}
 
 //    mlir::Location get_location(mlir::OpBuilder builder,
 //                                const std::string& file_name,
@@ -63,11 +52,11 @@ namespace qcor {
 //      return builder.getFileLineColLoc(builder.getIdentifier(file_name), line, col);
 //    }
 
-    std::vector<std::string> split(const std::string& s, char delim) {
-      std::vector<std::string> elems;
-      split(s, delim, std::back_inserter(elems));
-      return elems;
-    }
+//    std::vector<std::string> split(const std::string& s, char delim) {
+//      std::vector<std::string> elems;
+//      split(s, delim, std::back_inserter(elems));
+//      return elems;
+//    }
 
 //    mlir::Type get_custom_opaque_type(const std::string& type,
 //                                      mlir::MLIRContext* context) {
@@ -301,4 +290,3 @@ namespace qcor {
 //            {"==", mlir::CmpFPredicate::OEQ}, {"!=", mlir::CmpFPredicate::ONE},
 //            {"<=", mlir::CmpFPredicate::OLE}, {">=", mlir::CmpFPredicate::OGE},
 //            {"<", mlir::CmpFPredicate::OLT},  {">", mlir::CmpFPredicate::OGT}};
-}  // namespace qcor

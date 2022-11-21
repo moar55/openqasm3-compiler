@@ -80,23 +80,23 @@ std::any visitor::visitQuantumMeasurementAssignment(
         qasmParser::QuantumMeasurementAssignmentContext* context) {
   StringAttr str_attr = builder.getStringAttr("mz");
   auto measured_qreg = context->quantumMeasurement()->indexedIdentifier()->Identifier()->getText();
-  auto qubits = symbol_table.get_symbol(measured_qreg);
   auto extract_qubit = get_or_extract_qubit(measured_qreg, 0, builder.getUnknownLoc(),
                                             symbol_table, builder);
   auto bit_variable_name =
           context->indexedIdentifier()->Identifier()->getText();
   auto bit_value = symbol_table.get_symbol(bit_variable_name);
-  mlir::Value bit_idx_val = get_or_create_constant_integer_value(
-          0, builder.getUnknownLoc(), builder.getI64Type(), symbol_table, builder);
   auto instop = builder.create<mlir::quantum::InstOp>(
           builder.getUnknownLoc(), result_type, str_attr,
           llvm::makeArrayRef(extract_qubit),
           llvm::makeArrayRef(std::vector<mlir::Value>{}));
-  auto cast_bit_op = builder.create<mlir::quantum::ResultCastOp>(
-          builder.getUnknownLoc(), builder.getIntegerType(1), instop.bit());
-  builder.create<mlir::memref::StoreOp>(
-          builder.getUnknownLoc(), cast_bit_op.bit_result(), bit_value,
-          llvm::makeArrayRef(std::vector<mlir::Value>{bit_idx_val}));
-  symbol_table.invalidate_qubit_extracts(measured_qreg, {0});
+//  auto cast_bit_op = builder.create<mlir::quantum::ResultCastOp>(
+//          builder.getUnknownLoc(), builder.getIntegerType(1), instop.bit());
+//
+//  auto index_attr = builder.getIndexAttr(0);
+//  auto bit_idx_val = builder.create<mlir::arith::ConstantOp>(builder.getUnknownLoc(), index_attr);
+//  builder.create<mlir::memref::StoreOp>(
+//          builder.getUnknownLoc(), cast_bit_op.bit_result(), bit_value,
+//          llvm::makeArrayRef(std::vector<mlir::Value>{bit_idx_val}));
+//  symbol_table.invalidate_qubit_extracts(measured_qreg, {0});
   return {};
 }

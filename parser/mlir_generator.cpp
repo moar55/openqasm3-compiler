@@ -47,8 +47,6 @@ void MLIRGenerator::mlirgen(const std::string &src) {
   }
 //  auto symbol_table = visitor->getScopedSymbolTable();
 
-
-  const std::clock_t begin_time = std::clock();
   ANTLRInputStream input(src);
   qasmLexer lexer(&input);
   CommonTokenStream tokens(&lexer);
@@ -83,7 +81,6 @@ void MLIRGenerator::mlirgen(const std::string &src) {
 
   // Get the parse tree and visit
   tree::ParseTree *tree = parser.program();
-  std::cout << float(std::clock() - begin_time) / CLOCKS_PER_SEC << std::endl;
   my_visitor->visitChildren(tree);
   IntegerType i32 = builder.getI32Type();
   IntegerAttr return_attr = IntegerAttr::get(i32, 0);

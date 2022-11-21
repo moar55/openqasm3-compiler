@@ -1,13 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2018-, UT-Battelle, LLC.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the BSD 3-Clause License
- * which accompanies this distribution.
- *
- * Contributors:
- *   Alexander J. McCaskey - initial API and implementation
- *   Thien Nguyen - implementation
- *******************************************************************************/
 #pragma once
 #include <string>
 #include <vector>
@@ -15,12 +5,9 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Value.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
-#include "../generated/qasmBaseVisitor.h"
 #include "../generated/qasmParser.h"
 
-namespace qcor {
-
-    class ScopedSymbolTable;
+class ScopedSymbolTable;
 
 // static std::vector<std::string> builtins{
 //     "u3", "u2",   "u1",  "cx",  "id",  "u0",  "x",   "y",  "z",
@@ -82,4 +69,3 @@ namespace qcor {
 
     extern std::map<std::string, mlir::arith::CmpIPredicate> antlr_to_mlir_predicate;
     extern std::map<std::string, mlir::arith::CmpFPredicate> antlr_to_mlir_fpredicate;
-}  // namespace qcor

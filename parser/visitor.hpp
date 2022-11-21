@@ -102,9 +102,7 @@ public:
       return visitChildren(ctx);
     }
 
-    std::any visitClassicalAssignment(qasmParser::ClassicalAssignmentContext *ctx) override {
-      return visitChildren(ctx);
-    }
+    std::any visitClassicalAssignment(qasmParser::ClassicalAssignmentContext *ctx) override;
 
     std::any visitAssignmentStatement(qasmParser::AssignmentStatementContext *ctx) override {
       return visitChildren(ctx);
@@ -291,70 +289,30 @@ public:
       return visitChildren(ctx);
     }
 
-    std::any visitExpression(qasmParser::ExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitLogicalAndExpression(qasmParser::LogicalAndExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitBitOrExpression(qasmParser::BitOrExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitXOrExpression(qasmParser::XOrExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitBitAndExpression(qasmParser::BitAndExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitComparisonExpression(qasmParser::ComparisonExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitBitShiftExpression(qasmParser::BitShiftExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitAdditiveExpression(qasmParser::AdditiveExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitMultiplicativeExpression(qasmParser::MultiplicativeExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitUnaryExpression(qasmParser::UnaryExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitPowerExpression(qasmParser::PowerExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitIndexOperator(qasmParser::IndexOperatorContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitIndexExpression(qasmParser::IndexExpressionContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitIndexedIdentifier(qasmParser::IndexedIdentifierContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
-    std::any visitExpressionTerminator(qasmParser::ExpressionTerminatorContext *ctx) override {
-      return visitChildren(ctx);
-    }
-
+//    std::any visitLogicalAndExpression(qasmParser::LogicalAndExpressionContext *ctx) override;
+//
+//    std::any visitBitOrExpression(qasmParser::BitOrExpressionContext *ctx) override;
+//
+//    std::any visitXOrExpression(qasmParser::XOrExpressionContext *ctx) override;
+//
+//    std::any visitBitAndExpression(qasmParser::BitAndExpressionContext *ctx) override;
+//
+//    std::any visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) override;
+//
+//    std::any visitComparisonExpression(qasmParser::ComparisonExpressionContext *ctx) override;
+//
+//    std::any visitBitShiftExpression(qasmParser::BitShiftExpressionContext *ctx) override;
+//
+//    std::any visitUnaryExpression(qasmParser::UnaryExpressionContext *ctx) override;
+//
+//    std::any visitPowerExpression(qasmParser::PowerExpressionContext *ctx) override;
+//
+//    std::any visitIndexOperator(qasmParser::IndexOperatorContext *ctx) override;
+//
+//    std::any visitIndexExpression(qasmParser::IndexExpressionContext *ctx) override;
+//
+//    std::any visitIndexedIdentifier(qasmParser::IndexedIdentifierContext *ctx) override;
+//
     std::any visitBooleanLiteral(qasmParser::BooleanLiteralContext *ctx) override {
       return visitChildren(ctx);
     }
@@ -395,9 +353,7 @@ public:
       return visitChildren(ctx);
     }
 
-    std::any visitBranchingStatement(qasmParser::BranchingStatementContext *ctx) override {
-      return visitChildren(ctx);
-    }
+    std::any visitBranchingStatement(qasmParser::BranchingStatementContext *ctx) override;
 
     std::any visitLoopSignature(qasmParser::LoopSignatureContext *ctx) override {
       return visitChildren(ctx);

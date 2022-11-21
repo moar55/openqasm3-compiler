@@ -13,4 +13,4 @@
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/Interfaces/SideEffectInterfaces.h"
 
-#include "Quantum/QuantumOpsDialect.h.inc"
+#include "Quantum/IR/QuantumOpsDialect.h.inc"

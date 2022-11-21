@@ -225,6 +225,9 @@ quantumGateName
     | 'X'
     | 'Y'
     | 'Z'
+    | 'RX'
+    | 'RY'
+    | 'RZ'
     | 'PT3'
     | 'PT4'
 //    | Identifier

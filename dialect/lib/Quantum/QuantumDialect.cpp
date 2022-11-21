@@ -18,11 +18,11 @@ using namespace quantum;
 //===----------------------------------------------------------------------===//
 // Standalone dialect.
 //===----------------------------------------------------------------------===//
-#include "Quantum/QuantumOpsDialect.cpp.inc"
+#include "Quantum/IR/QuantumOpsDialect.cpp.inc"
 
 void QuantumDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
-#include "Quantum/QuantumOps.cpp.inc"
+#include "Quantum/IR/QuantumOps.cpp.inc"
   >();
 }

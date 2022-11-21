@@ -13,4 +13,4 @@
 #include "mlir/IR/TypeUtilities.h"
 
 #define GET_OP_CLASSES
-#include "Quantum/QuantumOps.cpp.inc"
+#include "Quantum/IR/QuantumOps.cpp.inc"

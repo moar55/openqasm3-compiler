@@ -9,6 +9,7 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "qasm_utils.hpp"
 
 struct SymbolTable {
     std::map<std::string, mlir::Value>::iterator begin() {
@@ -356,7 +357,7 @@ public:
     }
 
     // retrieve the symbol at the given scope, will search parent scopes
-    mlir::Value get_symbol(const std::string variable_name,
+    mlir::Value get_symbol(const std::string& variable_name,
                            const std::size_t scope) {
       for (auto i = scope; i >= 0; i--) {
         if (scoped_symbol_tables[i].has_symbol(variable_name)) {
@@ -364,9 +365,9 @@ public:
         }
       }
 
-//          printErrorMessage("No variable " + variable_name +
-//                            " in scoped symbol table (provided scope = " +
-//                            std::to_string(scope) + "). Did you allocate it?");
+      printErrorMessage("No variable " + variable_name +
+                            " in scoped symbol table (provided scope = " +
+                            std::to_string(scope) + "). Did you allocate it?");
     }
 
     mlir::Value get_last_value_added() { return last_value_added; }
@@ -377,7 +378,7 @@ public:
                     std::vector<std::string> var_attributes = {},
                     bool overwrite = false) {
       if (scope > current_scope) {
-//            printErrorMessage("Provided scope is greater than the current scope.\n");
+            printErrorMessage("Provided scope is greater than the current scope.\n");
       }
 
       if (has_symbol(variable_name)) {

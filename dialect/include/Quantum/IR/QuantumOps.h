@@ -9,4 +9,4 @@
 #include "QuantumDialect.h"
 //`
 #define GET_OP_CLASSES
-#include "Quantum/QuantumOps.h.inc"
+#include "Quantum/IR/QuantumOps.h.inc"

@@ -28,4 +28,9 @@ target_link_libraries(quantum-opt
         )
 
 target_compile_options(quantum-opt PRIVATE -fexceptions)
+
+
+
 mlir_check_all_link_libraries(quantum-opt)
+
+target_precompile_headers(quantum-opt PRIVATE ./headers.h)

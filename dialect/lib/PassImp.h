@@ -4,5 +4,5 @@ namespace mlir {
 namespace quantum {
 #define GEN_PASS_CLASSES
 #include "Quantum/Transforms/Passes.h.inc"
-} // namespace torch
+} // namespace quantum
 } // end namespace mlir
