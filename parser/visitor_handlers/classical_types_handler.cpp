@@ -38,6 +38,7 @@ std::any visitor::visitSingleDesignatorDeclaration(
   }
   Value val;
   if (context->equalsExpression()) {
+    auto text = context->Identifier()->getText();
     qasm_expression_generator generator(builder, symbol_table, value_type);
     generator.visitExpression(context->equalsExpression()->expression());
      val = generator.current_value;
@@ -91,6 +92,6 @@ std::any visitor::visitClassicalAssignment(qasmParser::ClassicalAssignmentContex
   Value identifier_val = symbol_table.get_symbol(identifier_text);
   qasm_expression_generator generator(builder, symbol_table, identifier_val.getType());
   generator.visitExpression(ctx->expression());
-  symbol_table.add_symbol(identifier_text, generator.current_value, {}, true);
+  symbol_table.add_symbol(identifier_text, generator.current_value, true);
   return {};
 }

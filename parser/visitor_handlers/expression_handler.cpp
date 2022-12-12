@@ -66,6 +66,7 @@ std::any qasm_expression_generator::visitExpressionTerminator(qasmParser::Expres
       if (symbol_table.get_symbol(ctx->getText()).getType() != internal_value_type)
         printErrorMessage("Type mismatch for identifier " + ctx->getText());
       update_current_value(symbol_table.get_symbol(ctx->getText()));
+      return {};
     }
     default:
       return {};

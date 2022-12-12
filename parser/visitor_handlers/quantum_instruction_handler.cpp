@@ -59,14 +59,12 @@ std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *conte
                                                             builder.getStringAttr(qgn->getText()),
                                                             qubits, params);
 
-
   //TODO (BUG): Only works if applied to different variables
   auto it = inst.result().begin();
   for (auto index: context->indexedIdentifier()) {
     auto qubit_var_name = index->Identifier()->getText();
-    symbol_table.add_symbol(qubit_var_name, *it, {}, true);
+    symbol_table.add_symbol(qubit_var_name, *it, true);
     it = std::next(it);
   }
-//  symbol_table.replace_symbol(qubits.front(), inst.result().front());
   return {};
 }

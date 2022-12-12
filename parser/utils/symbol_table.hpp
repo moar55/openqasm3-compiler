@@ -12,8 +12,18 @@
 #include "qasm_utils.hpp"
 
 struct SymbolTable {
-    std::map<std::string, mlir::Value> var_name_to_value;
 
+private:
+    std::map<std::string, mlir::Value> var_name_to_value;
+    // By reference var name aliasing map:
+    // track a variable name representing references to the original mlir::Value,
+    // e.g. qubit aliasing from slicing.
+    std::unordered_map<std::string, std::string> ref_var_name_to_orig_var_name;
+
+public:
+    const std::map<std::string, mlir::Value> &get_var_name_to_var_value() const {
+      return var_name_to_value;
+    }
     std::map<std::string, mlir::Value>::iterator begin() {
       return var_name_to_value.begin();
     }
@@ -110,11 +120,7 @@ struct SymbolTable {
       return var_name_to_value.count(var_name);
     }
 
-private:
-    // By reference var name aliasing map:
-    // track a variable name representing references to the original mlir::Value,
-    // e.g. qubit aliasing from slicing.
-    std::unordered_map<std::string, std::string> ref_var_name_to_orig_var_name;
+
 };
 
 using ConstantIntegerTable =
@@ -127,7 +133,6 @@ class ScopedSymbolTable {
 public:
     std::vector<SymbolTable> scoped_symbol_tables;
     std::size_t current_scope = 0;
-    std::map<std::string, std::vector<std::string>> variable_attributes;
 
     // key is (int, width)
     std::vector<ConstantIntegerTable> constant_integer_values;
@@ -190,9 +195,6 @@ public:
       }
     }
 
-    // Get all visible symbols at the current scope.
-    // Nearer symbols take precedence over further ones (if having the same name)
-    std::unordered_map<std::string, mlir::Value> get_all_visible_symbols();
 
     // Create new scope symbol table
     // will push_back on scoped_symbol_tables;
@@ -220,8 +222,6 @@ public:
       return;
     }
 
-    void replace_symbol(mlir::Value old_value, mlir::Value new_value);
-
     // Returns an empty string if this Value is not tracked in the symbol table.
     std::string get_symbol_var_name(mlir::Value value);
 
@@ -232,19 +232,6 @@ public:
       }
       return fnames;
     }
-//        std::map<std::string, int64_t> get_constant_integer_variables() {
-//          std::map<std::string, int64_t> ret;
-//          for (int i = current_scope; i >= 0; i--) {
-//            auto constant_ops = get_symbols_of_type_at_scope<mlir::ConstantOp>(i);
-//            for (auto [var_name, op] : constant_ops) {
-//              if (op.getValue().isa<mlir::IntegerAttr>()) {
-//                ret.insert(
-//                        {var_name, op.getValue().cast<mlir::IntegerAttr>().getInt()});
-//              }
-//            }
-//          }
-//          return ret;
-//        }
 
     // Eval a const int expression (throw if failed)
     int64_t evaluate_constant_integer_expression(const std::string expr);
@@ -279,32 +266,10 @@ public:
 
     mlir::Value get_constant_integer(std::uint64_t key, int width = 64) {
       if (!has_constant_integer(key, width)) {
-//            printErrorMessage("constant integer " + std::to_string(key) +
-//                              " is not in the symbol table.");
+            printErrorMessage("constant integer " + std::to_string(key) +
+                              " is not in the symbol table.");
       }
       return constant_integer_values[current_scope][{key, width}];
-    }
-//        bool is_allocation(const std::string variable_name) {
-//          return has_symbol(variable_name) &&
-//                 get_symbol(variable_name).getDefiningOp<mlir::AllocOp>();
-//        }
-
-    std::vector<std::string> get_variable_attributes(
-            const std::string variable_name) {
-      if (!has_symbol(variable_name)) {
-        std::cout << "err" << "Variable " + variable_name +
-                              " does not have any attributes." << std::endl;
-      }
-      return variable_attributes[variable_name];
-    }
-
-    bool is_variable_mutable(const std::string variable_name) {
-      if (!has_symbol(variable_name)) {
-//            printErrorMessage("Cannot check variable mutability, variable " +
-//                              variable_name + " does not exist.");
-      }
-      auto attrs = variable_attributes[variable_name];
-      return std::find(attrs.begin(), attrs.end(), "const") == std::end(attrs);
     }
 
     bool has_symbol(const std::string variable_name) {
@@ -312,22 +277,13 @@ public:
     }
 
     bool has_symbol(const std::string variable_name, const std::size_t scope) {
-      for (int i = scope; i >= 0; i--) { // nasty bug, auto instead of int...
+      for (int i = scope; i >= 0; i--) {
         if (scoped_symbol_tables[i].has_symbol(variable_name)) {
           return true;
         }
       }
 
       return false;
-    }
-
-    void add_symbol_ref_alias(const std::string &orig_variable_name,
-                              const std::string &alias_ref_variable_name) {
-      // Sanity check for debug
-      assert(has_symbol(orig_variable_name));
-      assert(!has_symbol(alias_ref_variable_name));
-      scoped_symbol_tables[current_scope].add_alias(orig_variable_name,
-                                                    alias_ref_variable_name);
     }
 
     SymbolTable &get_global_symbol_table() { return scoped_symbol_tables[0]; }
@@ -339,19 +295,6 @@ public:
         auto op = value.template getDefiningOp<OpTy>();
         if (op) {
           ret.push_back(op);
-        }
-      }
-      return ret;
-    }
-
-    template<typename OpTy>
-    std::vector<std::pair<std::string, OpTy>> get_symbols_of_type_at_scope(
-            const std::size_t scope) {
-      std::vector<std::pair<std::string, OpTy>> ret;
-      for (auto&[var_name, value]: scoped_symbol_tables[scope]) {
-        auto op = value.template getDefiningOp<OpTy>();
-        if (op) {
-          ret.push_back({var_name, op});
         }
       }
       return ret;
@@ -373,45 +316,9 @@ public:
 
     mlir::Value get_last_value_added() { return last_value_added; }
 
-    // add the symbol to the given scope
-    void add_symbol(const std::string variable_name, mlir::Value value,
-                    const std::size_t scope,
-                    std::vector<std::string> var_attributes = {},
-                    bool overwrite = false) {
-      if (scope > current_scope) {
-            printErrorMessage("Provided scope is greater than the current scope.\n");
-      }
-
-      if (has_symbol(variable_name)) {
-        if (!overwrite) {
-//              printErrorMessage(variable_name + " is already in the symbol table.");
-        } else {
-          scoped_symbol_tables[scope][variable_name] = value;
-          variable_attributes[variable_name] = var_attributes;
-          last_value_added = value;
-          replacement_helper[value.getAsOpaquePointer()] = variable_name;
-          return;
-        }
-      }
-
-      scoped_symbol_tables[scope].insert({variable_name, value});
-      variable_attributes.insert({variable_name, var_attributes});
-      last_value_added = value;
-
-      replacement_helper.insert({value.getAsOpaquePointer(), variable_name});
-    }
 
     // get symbol at the current scope, will search parent scopes
     mlir::Value get_symbol(const std::string variable_name) {
-//          if (global_constant_memref_types.count(variable_name)) {
-//            llvm::ArrayRef<int64_t> shape{};
-//            return builder->create<mlir::memref::GetGlobalMemrefOp>(
-//                    builder->getUnknownLoc(),
-//                    mlir::MemRefType::get(shape,
-//                                          global_constant_memref_types[variable_name]),
-//                    variable_name);
-//          }
-
       if (!has_symbol(variable_name)) {
         std::cout << "err" << "invalid symbol, not in the symbol table - " +
                               variable_name << std::endl;
@@ -425,23 +332,24 @@ public:
 
     std::vector<std::pair<std::string, mlir::Value>> get_symbols_and_values_pair(const std::size_t scope) {
       std::vector<std::pair<std::string, mlir::Value>> ret;
-      for (auto const& [symbol,val]: scoped_symbol_tables[scope].var_name_to_value) {
+      for (auto const& [symbol,val]: scoped_symbol_tables[scope].get_var_name_to_var_value()) {
         ret.push_back({symbol, val});
       }
       return ret;
     }
 
-    // add symbol to current scope
-    void add_symbol(const std::string variable_name, mlir::Value value,
-                    std::vector<std::string> var_attributes = {},
-                    bool overwrite = false) {
-      add_symbol(variable_name, value, current_scope, var_attributes, overwrite);
-    }
 
-    // add symbol to global scope
-    void add_global_symbol(const std::string variable_name, mlir::Value value) {
-      add_symbol(variable_name, value, 0);
-    }
+    // add or updates symbol in the given scope
+    void add_symbol(const std::string variable_name, const mlir::Value &value,
+                    const std::size_t scope,
+                    bool overwrite = false);
+
+    // add or updates symbol in the current scope
+    void add_symbol(const std::string variable_name, const mlir::Value &value,
+                    bool overwrite = false);
+
+    // add or updates symbol in the current scope
+    void add_global_symbol(const std::string variable_name, const mlir::Value &value);
 
     // return the current scope
     std::size_t get_current_scope() { return current_scope; }
@@ -464,24 +372,6 @@ public:
     std::string array_qubit_symbol_name(const std::string &qreg_name, int index) {
       return array_qubit_symbol_name(qreg_name, std::to_string(index));
     }
-
-    // Invalidate all qubit symbol tracking:
-    // e.g., q%1, q%2, etc.
-    // This will force a re-extract afterward, i.e. disconnect the SSA chain.
-    // Rationale:
-    // In cases whereby the qubit SSA use-def chain cannot be tracked reliably,
-    // we need to flush the tracking, i.e., effectively adding a barrier in the use-def chain.
-    // for example,
-    // - Gates (QVS Op) in a conditional block: we disconnect the SSA chain before and after the contional blocks
-    // for any qubits that are involved in that block.
-    // - Ambiguous qubits: e.g. q[i] (i is not known at compile time), we need to flush the entire
-    // use-def chain on register q.
-    // - Function call: passing a qreg to a subroutine.
-    // Notes: during optimization passes, we may be able to reconnect/reconstruct some SSA chains
-    // thanks to inlining and loop-unrolling.
-    // Empty `indices` list indicates that we flush all qubits.
-    void invalidate_qubit_extracts(const std::string &qreg_name,
-                                   const std::vector<int> &indices = {});
 
     std::optional<size_t> get_qreg_size(const std::string &qreg_name);
 
