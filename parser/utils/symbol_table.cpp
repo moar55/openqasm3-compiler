@@ -5,7 +5,6 @@
 #include "exprtk.hpp"
 #include "Quantum/IR/QuantumOps.h"
 #include "mlir/IR/Builders.h"
-#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/BuiltinTypes.h"
 
 using symbol_table_t = exprtk::symbol_table<double>;
