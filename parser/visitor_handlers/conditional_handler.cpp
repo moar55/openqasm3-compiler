@@ -20,36 +20,76 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
   //  disable building to find out the types first
   auto hasElseBlock = ctx->statementOrScope().size() == 2;
 
+  auto builder_backup = builder;
+
   auto context = std::make_unique<MLIRContext>();
   context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithmeticDialect,
-          scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
+            scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
+
   OpBuilder shadow_builder(context.get());
-  auto temp = builder;
+//  auto shadow_module = ModuleOp::create(shadow_builder.getUnknownLoc());
+//
+//  llvm::StringRef name("quantum");
+//  StringAttr n = StringAttr::get(context.get(), name); // namespace
+//
+//  auto int_type = shadow_builder.getI32Type();
+//  auto argv_type =
+//          OpaqueType::get(n, llvm::StringRef("ArgvType"));
+//
+//  std::vector<Type> arg_types_vec{int_type, argv_type};
+//  auto func_type =
+//          shadow_builder.getFunctionType(llvm::makeArrayRef(arg_types_vec), int_type);
+//  auto proto =
+//          func::FuncOp::create(shadow_builder.getUnknownLoc(), "main", func_type);
+//  func::FuncOp function(proto);
+//
+//  auto &entryBlock = *function.addEntryBlock();
+//  shadow_builder.setInsertionPointToStart(&entryBlock);
+//  shadow_module.push_back(function);
+
+  std::set<std::string> yield_symbols;
+
   builder = shadow_builder;
   symbol_table.enter_new_scope();
   // visit then scope nodes
   this->visitChildren(ctx->if_body);
+  for (auto const& [symbol, val] : symbol_table.get_symbols_and_values_pair(symbol_table.get_current_scope())) {
+    if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope())) {
+      yield_symbols.insert(symbol);
+    }
+  }
   symbol_table.exit_scope();
 
   if (hasElseBlock) {
-    builder = shadow_builder;
     symbol_table.enter_new_scope();
     // visit else scope nodes
     this->visitChildren(ctx->else_body);
+    for (auto const& [symbol, val] : symbol_table.get_symbols_and_values_pair(symbol_table.get_current_scope())) {
+      if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope())) {
+        yield_symbols.insert(symbol);
+      }
+    }
     symbol_table.exit_scope();
   }
 
-  builder = temp;
+  builder = builder_backup;
 
-  auto ifOp = builder.create<scf::IfOp>(builder.getUnknownLoc(), llvm::ArrayRef{qubit_type, qubit_type}, cond, hasElseBlock);
+  std::vector<Type> yield_types;
+  for (auto const& symbol: yield_symbols) {
+      yield_types.push_back(symbol_table.get_symbol(symbol).getType());
+  }
+
+  auto ifOp = builder.create<scf::IfOp>(builder.getUnknownLoc(), llvm::ArrayRef(yield_types), cond, hasElseBlock);
 
   // Build the then part
   auto thenBodyBuilder = ifOp.getThenBodyBuilder();
-  auto builder_backup = builder;
   builder = thenBodyBuilder;
   symbol_table.enter_new_scope();
   // visit then scope nodes
   this->visitChildren(ctx->if_body);
+  for (auto const& symbol: yield_symbols) {
+    builder.create<scf::YieldOp>(builder.getUnknownLoc(), symbol_table.get_symbol(symbol));
+  }
   symbol_table.exit_scope();
 
   if (hasElseBlock) {
@@ -58,10 +98,18 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
     symbol_table.enter_new_scope();
     // visit else scope nodes
     this->visitChildren(ctx->else_body);
-//    builder.create<scf::YieldOp>(builder.getUnknownLoc(), temp.getResult());
+    for (auto const& symbol: yield_symbols) {
+      builder.create<scf::YieldOp>(builder.getUnknownLoc(), symbol_table.get_symbol(symbol));
+    }
     symbol_table.exit_scope();
   }
+
   builder = builder_backup;
-  std::cout << "size " << ifOp.getResults().size() << "\n";
+
+  auto it = ifOp.getResults().begin();
+  for (auto const& symbol: yield_symbols) {
+    symbol_table.add_symbol(symbol, *it, {}, true);
+    it = std::next(it);
+  }
   return {};
 }

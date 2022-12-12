@@ -12,6 +12,8 @@
 #include "qasm_utils.hpp"
 
 struct SymbolTable {
+    std::map<std::string, mlir::Value> var_name_to_value;
+
     std::map<std::string, mlir::Value>::iterator begin() {
       return var_name_to_value.begin();
     }
@@ -109,7 +111,6 @@ struct SymbolTable {
     }
 
 private:
-    std::map<std::string, mlir::Value> var_name_to_value;
     // By reference var name aliasing map:
     // track a variable name representing references to the original mlir::Value,
     // e.g. qubit aliasing from slicing.
@@ -416,6 +417,18 @@ public:
                               variable_name << std::endl;
       }
       return get_symbol(variable_name, current_scope);
+    }
+
+    std::vector<std::pair<std::string, mlir::Value>> get_symbols_and_values_pair() {
+      return get_symbols_and_values_pair(0);
+    }
+
+    std::vector<std::pair<std::string, mlir::Value>> get_symbols_and_values_pair(const std::size_t scope) {
+      std::vector<std::pair<std::string, mlir::Value>> ret;
+      for (auto const& [symbol,val]: scoped_symbol_tables[scope].var_name_to_value) {
+        ret.push_back({symbol, val});
+      }
+      return ret;
     }
 
     // add symbol to current scope

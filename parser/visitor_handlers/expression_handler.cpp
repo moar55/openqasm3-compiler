@@ -79,9 +79,10 @@ std::any qasm_expression_generator::visitExpression(qasmParser::ExpressionContex
 std::any qasm_expression_generator::visitAdditiveExpression(qasmParser::AdditiveExpressionContext *ctx) {
   auto location = builder.getUnknownLoc();
   if (ctx->additiveExpression()) {
-    auto lhs = std::any_cast<Value>(this->visitAdditiveExpression(ctx->additiveExpression()));
-    auto rhs = std::any_cast<Value>(this->visitMultiplicativeExpression(ctx->multiplicativeExpression()));
-//    return createOp<arith::AddFOp>(location, lhs, rhs);
+    this->visitAdditiveExpression(ctx->additiveExpression());
+    auto lhs = current_value;
+    this->visitMultiplicativeExpression(ctx->multiplicativeExpression());
+    auto rhs = current_value;
     Value val;
     if (internal_value_type.isa<IntegerType>()) {
       val = createOp<arith::AddIOp>(location, lhs, rhs);
@@ -90,17 +91,20 @@ std::any qasm_expression_generator::visitAdditiveExpression(qasmParser::Additive
     } else {
       printErrorMessage("Assigning to an identifier of this type is not supported yet!");
     }
-    return val;
+    update_current_value(val);
   } else {
-    return this->visitMultiplicativeExpression(ctx->multiplicativeExpression());
+    this->visitMultiplicativeExpression(ctx->multiplicativeExpression());
   }
+  return {};
 }
 
 std::any qasm_expression_generator::visitMultiplicativeExpression(qasmParser::MultiplicativeExpressionContext *ctx) {
     auto location = builder.getUnknownLoc();
     if (ctx->multiplicativeExpression()) {
-      auto lhs = std::any_cast<Value>(this->visitMultiplicativeExpression(ctx->multiplicativeExpression()));
-      auto rhs = std::any_cast<Value>(this->visitUnaryExpression(ctx->unaryExpression()));
+      this->visitMultiplicativeExpression(ctx->multiplicativeExpression());
+      auto lhs = current_value;
+      this->visitUnaryExpression(ctx->unaryExpression());
+      auto rhs = current_value;
       Value val;
       if (internal_value_type.isa<IntegerType>()) {
         val = createOp<arith::MulIOp>(location, lhs, rhs);
@@ -109,9 +113,9 @@ std::any qasm_expression_generator::visitMultiplicativeExpression(qasmParser::Mu
       } else {
         printErrorMessage("Assigning to an identifier of this type is not supported yet!");
       }
-
-      return val;
+      update_current_value(val);
     } else {
-      return this->visitUnaryExpression(ctx->unaryExpression());
+      this->visitUnaryExpression(ctx->unaryExpression());
     }
+    return {};
   }
