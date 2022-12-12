@@ -319,8 +319,14 @@ public:
   virtual void enterSubroutineBlock(qasmParser::SubroutineBlockContext *ctx) = 0;
   virtual void exitSubroutineBlock(qasmParser::SubroutineBlockContext *ctx) = 0;
 
+  virtual void enterScope(qasmParser::ScopeContext *ctx) = 0;
+  virtual void exitScope(qasmParser::ScopeContext *ctx) = 0;
+
   virtual void enterPragma(qasmParser::PragmaContext *ctx) = 0;
   virtual void exitPragma(qasmParser::PragmaContext *ctx) = 0;
+
+  virtual void enterStatementOrScope(qasmParser::StatementOrScopeContext *ctx) = 0;
+  virtual void exitStatementOrScope(qasmParser::StatementOrScopeContext *ctx) = 0;
 
   virtual void enterTimingType(qasmParser::TimingTypeContext *ctx) = 0;
   virtual void exitTimingType(qasmParser::TimingTypeContext *ctx) = 0;

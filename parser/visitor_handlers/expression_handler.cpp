@@ -1,4 +1,3 @@
-#include "../visitor.hpp"
 #include "../generated/qasmLexer.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 #include <cmath>
@@ -85,9 +84,9 @@ std::any qasm_expression_generator::visitAdditiveExpression(qasmParser::Additive
 //    return createOp<arith::AddFOp>(location, lhs, rhs);
     Value val;
     if (internal_value_type.isa<IntegerType>()) {
-      val = createOp<arith::AddFOp>(location, lhs, rhs);
-    } else if (internal_value_type.isa<FloatType>()){
       val = createOp<arith::AddIOp>(location, lhs, rhs);
+    } else if (internal_value_type.isa<FloatType>()){
+      val = createOp<arith::AddFOp>(location, lhs, rhs);
     } else {
       printErrorMessage("Assigning to an identifier of this type is not supported yet!");
     }

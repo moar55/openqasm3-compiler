@@ -321,8 +321,14 @@ public:
   virtual void enterSubroutineBlock(qasmParser::SubroutineBlockContext * /*ctx*/) override { }
   virtual void exitSubroutineBlock(qasmParser::SubroutineBlockContext * /*ctx*/) override { }
 
+  virtual void enterScope(qasmParser::ScopeContext * /*ctx*/) override { }
+  virtual void exitScope(qasmParser::ScopeContext * /*ctx*/) override { }
+
   virtual void enterPragma(qasmParser::PragmaContext * /*ctx*/) override { }
   virtual void exitPragma(qasmParser::PragmaContext * /*ctx*/) override { }
+
+  virtual void enterStatementOrScope(qasmParser::StatementOrScopeContext * /*ctx*/) override { }
+  virtual void exitStatementOrScope(qasmParser::StatementOrScopeContext * /*ctx*/) override { }
 
   virtual void enterTimingType(qasmParser::TimingTypeContext * /*ctx*/) override { }
   virtual void exitTimingType(qasmParser::TimingTypeContext * /*ctx*/) override { }

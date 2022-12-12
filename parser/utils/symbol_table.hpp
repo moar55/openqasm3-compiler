@@ -123,7 +123,7 @@ std::map<std::pair<std::uint64_t, int>, mlir::Value>;
 // created mlir::Values keyed on their unique variable name
 // at the current scope.
 class ScopedSymbolTable {
-protected:
+public:
     std::vector<SymbolTable> scoped_symbol_tables;
     std::size_t current_scope = 0;
     std::map<std::string, std::vector<std::string>> variable_attributes;

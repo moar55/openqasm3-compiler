@@ -72,11 +72,12 @@ public:
     RuleProgramBlock = 90, RuleBranchingStatement = 91, RuleLoopSignature = 92, 
     RuleLoopStatement = 93, RuleEndStatement = 94, RuleReturnStatement = 95, 
     RuleControlDirective = 96, RuleExternDeclaration = 97, RuleExternOrSubroutineCall = 98, 
-    RuleSubroutineDefinition = 99, RuleSubroutineBlock = 100, RulePragma = 101, 
-    RuleTimingType = 102, RuleTimingBox = 103, RuleTimingIdentifier = 104, 
-    RuleTimingInstructionName = 105, RuleTimingInstruction = 106, RuleTimingStatement = 107, 
-    RuleCalibration = 108, RuleCalibrationGrammarDeclaration = 109, RuleCalibrationDefinition = 110, 
-    RuleCalibrationGrammar = 111, RuleCalibrationArgumentList = 112
+    RuleSubroutineDefinition = 99, RuleSubroutineBlock = 100, RuleScope = 101, 
+    RulePragma = 102, RuleStatementOrScope = 103, RuleTimingType = 104, 
+    RuleTimingBox = 105, RuleTimingIdentifier = 106, RuleTimingInstructionName = 107, 
+    RuleTimingInstruction = 108, RuleTimingStatement = 109, RuleCalibration = 110, 
+    RuleCalibrationGrammarDeclaration = 111, RuleCalibrationDefinition = 112, 
+    RuleCalibrationGrammar = 113, RuleCalibrationArgumentList = 114
   };
 
   explicit qasmParser(antlr4::TokenStream *input);
@@ -197,7 +198,9 @@ public:
   class ExternOrSubroutineCallContext;
   class SubroutineDefinitionContext;
   class SubroutineBlockContext;
+  class ScopeContext;
   class PragmaContext;
+  class StatementOrScopeContext;
   class TimingTypeContext;
   class TimingBoxContext;
   class TimingIdentifierContext;
@@ -1809,13 +1812,15 @@ public:
 
   class  BranchingStatementContext : public antlr4::ParserRuleContext {
   public:
+    qasmParser::StatementOrScopeContext *if_body = nullptr;
+    qasmParser::StatementOrScopeContext *else_body = nullptr;
     BranchingStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *LPAREN();
     ExpressionContext *expression();
     antlr4::tree::TerminalNode *RPAREN();
-    std::vector<ProgramBlockContext *> programBlock();
-    ProgramBlockContext* programBlock(size_t i);
+    std::vector<StatementOrScopeContext *> statementOrScope();
+    StatementOrScopeContext* statementOrScope(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -1987,6 +1992,24 @@ public:
 
   SubroutineBlockContext* subroutineBlock();
 
+  class  ScopeContext : public antlr4::ParserRuleContext {
+  public:
+    ScopeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LBRACE();
+    antlr4::tree::TerminalNode *RBRACE();
+    std::vector<StatementContext *> statement();
+    StatementContext* statement(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ScopeContext* scope();
+
   class  PragmaContext : public antlr4::ParserRuleContext {
   public:
     PragmaContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -2004,6 +2027,22 @@ public:
   };
 
   PragmaContext* pragma();
+
+  class  StatementOrScopeContext : public antlr4::ParserRuleContext {
+  public:
+    StatementOrScopeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    StatementContext *statement();
+    ScopeContext *scope();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  StatementOrScopeContext* statementOrScope();
 
   class  TimingTypeContext : public antlr4::ParserRuleContext {
   public:

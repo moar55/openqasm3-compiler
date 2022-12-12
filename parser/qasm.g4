@@ -495,7 +495,7 @@ programBlock
     ;
 
 branchingStatement
-    : 'if' LPAREN expression RPAREN programBlock ( 'else' programBlock )?
+    : 'if' LPAREN expression RPAREN if_body=statementOrScope ('else' else_body=statementOrScope)?
     ;
 
 loopSignature
@@ -540,9 +540,14 @@ subroutineBlock
 
 /*** Directives ***/
 
+scope: LBRACE statement* RBRACE;
+
 pragma
     : '#pragma' LBRACE statement* RBRACE  // match any valid openqasm statement
     ;
+
+
+statementOrScope: statement | scope;
 
 /*** Circuit Timing ***/
 

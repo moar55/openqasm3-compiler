@@ -59,6 +59,9 @@ std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *conte
                                                             builder.getStringAttr(qgn->getText()),
                                                             qubits, params);
 
-  symbol_table.replace_symbol(qubits.front(), inst.result().front());
+//  for (auto &qubit: qubits) {
+    symbol_table.replace_symbol(qubits.front(), inst.result().front());
+
+//  }
   return {};
 }

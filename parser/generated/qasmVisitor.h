@@ -222,7 +222,11 @@ public:
 
     virtual std::any visitSubroutineBlock(qasmParser::SubroutineBlockContext *context) = 0;
 
+    virtual std::any visitScope(qasmParser::ScopeContext *context) = 0;
+
     virtual std::any visitPragma(qasmParser::PragmaContext *context) = 0;
+
+    virtual std::any visitStatementOrScope(qasmParser::StatementOrScopeContext *context) = 0;
 
     virtual std::any visitTimingType(qasmParser::TimingTypeContext *context) = 0;
 

@@ -421,7 +421,15 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitScope(qasmParser::ScopeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitPragma(qasmParser::PragmaContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitStatementOrScope(qasmParser::StatementOrScopeContext *ctx) override {
     return visitChildren(ctx);
   }
 
