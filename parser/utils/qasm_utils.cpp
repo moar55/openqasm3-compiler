@@ -44,6 +44,39 @@ void printErrorMessage(const std::string msg, std::vector<mlir::Value> &&v) {
   exit(1);
 }
 
+std::string get_quantum_type(mlir::Value qubit_ident) {
+  return qubit_ident.getType().cast<OpaqueType>().getTypeData().str();
+}
+
+std::string get_indexed_name(std::string var_name, int index) {
+  return var_name + "%" + std::to_string(index);
+}
+
+std::string get_name_from_indexed_name(std::string var_name) {
+  auto index = var_name.find("%");
+  if (index == std::string::npos) {
+    printErrorMessage("not an indexed variable - " + var_name); //TODO: better erroring
+  }
+  return var_name.substr(0, index);
+}
+int get_index_from_indexed_name(std::string var_name) {
+  auto index = var_name.find("%");
+  if (index == std::string::npos) {
+    printErrorMessage("not an indexed variable - " + var_name); //TODO: better erroring
+  }
+  return std::stoi(var_name.substr(index + 1));
+}
+
+int get_qubit_arr_size(mlir::Value qubit_ident) {
+  return qubit_ident.getDefiningOp<quantum::QallocOp>().sizeAttr().getInt();
+}
+
+std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val){ //TODO: maybe move to vistor class better?
+  IntegerType i64 = builder.getI64Type();
+  auto attr = IntegerAttr::get(i64, val);
+  return std::make_unique<mlir::Value>(builder.create<arith::ConstantOp>(builder.getUnknownLoc(), attr, i64));
+}
+
 //    mlir::Location get_location(mlir::OpBuilder builder,
 //                                const std::string& file_name,
 //                                antlrcpp::ParserRuleContext* context) {

@@ -21,7 +21,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
   auto hasElseBlock = ctx->statementOrScope().size() == 2;
 
   auto builder_backup = builder;
-
+  // -------------- begin shadow visit ----------------------------//
   //TODO: refactor in a function?
   auto context = std::make_unique<MLIRContext>();
   context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithmeticDialect,
@@ -34,8 +34,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
   // visit then scope nodes
   this->visitChildren(ctx->if_body);
   for (auto const& [symbol, val] : symbol_table.get_symbols_and_values_pair(symbol_table.get_current_scope())) { //TODO: refactor in a funciton
-    //TODO: make sure this works for nested if's
-    if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope())) {
+    if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope(), true)) {
       yield_symbols.insert(symbol);
     }
   }
@@ -46,18 +45,19 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
     // visit else scope nodes
     this->visitChildren(ctx->else_body);
     for (auto const& [symbol, val] : symbol_table.get_symbols_and_values_pair(symbol_table.get_current_scope())) {
-      if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope())) {
+      if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope(), true)) {
         yield_symbols.insert(symbol);
       }
     }
     symbol_table.exit_scope();
   }
 
+  //-------------- end shadow build --------------------------//
   builder = builder_backup;
 
   std::vector<Type> yield_types;
   for (auto const& symbol: yield_symbols) {
-      yield_types.push_back(symbol_table.get_symbol(symbol).getType());
+      yield_types.push_back(get_symbol_type(symbol));
   }
 
   auto ifOp = builder.create<scf::IfOp>(builder.getUnknownLoc(), llvm::ArrayRef(yield_types), cond, hasElseBlock);
@@ -68,9 +68,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
   symbol_table.enter_new_scope();
   // visit then scope nodes
   this->visitChildren(ctx->if_body);
-  for (auto const& symbol: yield_symbols) {
-    builder.create<scf::YieldOp>(builder.getUnknownLoc(), symbol_table.get_symbol(symbol));
-  }
+  gen_yield_of_symbols(yield_symbols);
   symbol_table.exit_scope();
 
   if (hasElseBlock) {
@@ -79,9 +77,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
     symbol_table.enter_new_scope();
     // visit else scope nodes
     this->visitChildren(ctx->else_body);
-    for (auto const& symbol: yield_symbols) {
-      builder.create<scf::YieldOp>(builder.getUnknownLoc(), symbol_table.get_symbol(symbol));
-    }
+    gen_yield_of_symbols(yield_symbols);
     symbol_table.exit_scope();
   }
 

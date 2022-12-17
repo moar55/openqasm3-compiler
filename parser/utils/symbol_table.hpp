@@ -35,18 +35,27 @@ public:
     // Check if we have this symbol:
     // If this is a *root* (master) symbol, backed by a mlir::Value
     // or this is an alias (by reference), normally only for Qubits (SSA values)
-    bool has_symbol(const std::string &var_name) {
+    bool has_symbol(const std::string &var_name, bool ignore_index = false) {
       if (var_name_to_value.find(var_name) != var_name_to_value.end()) {
         return true;
       }
-      const auto alias_name_check_iter =
-              ref_var_name_to_orig_var_name.find(var_name);
-      if (alias_name_check_iter != ref_var_name_to_orig_var_name.end()) {
-        const std::string &original_var_name = alias_name_check_iter->second;
-        return var_name_to_value.find(original_var_name) !=
-               var_name_to_value.end();
+
+      if (ignore_index) {
+        auto index = var_name.find("%");
+        if (index != std::string::npos && var_name_to_value.find(var_name.substr(0, index)) != var_name_to_value.end()) {
+          return true;
+        }
       }
       return false;
+
+//      const auto alias_name_check_iter =
+//              ref_var_name_to_orig_var_name.find(var_name);
+//      if (alias_name_check_iter != ref_var_name_to_orig_var_name.end()) {
+//        const std::string &original_var_name = alias_name_check_iter->second;
+//        return var_name_to_value.find(original_var_name) !=
+//               var_name_to_value.end();
+//      }
+//      return false;
     }
 
     // Add a reference alias, i.e. the two variable names are bound
@@ -80,7 +89,7 @@ public:
         assert(var_name_to_value.find(root_var_name) != var_name_to_value.end());
         return var_name_to_value[root_var_name];
       }
-      std::cout << "err" << "Unknown symbol '" + var_name + "'." << std::endl;
+      std::cout << "err " << "Unknown symbol '" + var_name + "'." << std::endl;
       return mlir::Value();
     }
 
@@ -272,13 +281,13 @@ public:
       return constant_integer_values[current_scope][{key, width}];
     }
 
-    bool has_symbol(const std::string variable_name) {
-      return has_symbol(variable_name, current_scope);
+    bool has_symbol(const std::string variable_name, bool ignore_index = false) {
+      return has_symbol(variable_name, current_scope, ignore_index);
     }
 
-    bool has_symbol(const std::string variable_name, const std::size_t scope) {
+    bool has_symbol(const std::string variable_name, const std::size_t scope, bool ignore_index = false) {
       for (int i = scope; i >= 0; i--) {
-        if (scoped_symbol_tables[i].has_symbol(variable_name)) {
+        if (scoped_symbol_tables[i].has_symbol(variable_name, ignore_index)) {
           return true;
         }
       }
@@ -308,7 +317,6 @@ public:
           return scoped_symbol_tables[i].get_symbol(variable_name);
         }
       }
-
       printErrorMessage("No variable " + variable_name +
                             " in scoped symbol table (provided scope = " +
                             std::to_string(scope) + "). Did you allocate it?");
@@ -320,8 +328,8 @@ public:
     // get symbol at the current scope, will search parent scopes
     mlir::Value get_symbol(const std::string variable_name) {
       if (!has_symbol(variable_name)) {
-        std::cout << "err" << "invalid symbol, not in the symbol table - " +
-                              variable_name << std::endl;
+        printErrorMessage(std::string("err ") + std::string("invalid symbol, not in the symbol table - ") +
+                              variable_name);
       }
       return get_symbol(variable_name, current_scope);
     }

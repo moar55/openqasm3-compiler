@@ -1,5 +1,7 @@
 #include "../visitor.hpp"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "../utils/qasm_utils.hpp"
+
 
 mlir::Value get_or_create_constant_integer_value(
         const std::size_t idx, mlir::Location location, mlir::Type type,

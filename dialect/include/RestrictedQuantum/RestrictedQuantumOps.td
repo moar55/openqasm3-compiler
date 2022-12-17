@@ -37,7 +37,7 @@ def SqrtX: RestrictedQuantumOp<"sqrtx"> {
 
 def CX : RestrictedQuantumOp<"cx"> {
     let arguments = (ins QubitType: $qubit1, QubitType: $qubit2);
-    let results = (outs QubitType:$result);
+    let results = (outs QubitType: $control, QubitType: $sink);
 }
 
 // U = Rz Ry(theta) Rz

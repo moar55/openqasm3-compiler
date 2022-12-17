@@ -131,7 +131,7 @@ public :
           std::cout << "CX requires two operands" << std::endl;
           exit(1);
         }
-        rewriter.replaceOpWithNewOp<restquantum::CX>(op, op.getOperand(0).getType(), op->getOperand(0),
+        rewriter.replaceOpWithNewOp<restquantum::CX>(op, op.getOperand(0).getType(), op.getOperand(1).getType(), op->getOperand(0),
                                                      op.getOperand(1));
       } else {
         std::cout << gate_name + " gate is not supported" << std::endl;

@@ -435,6 +435,9 @@ public:
       return visitChildren(ctx);
     }
 
+    void gen_yield_of_symbols(const std::set<std::string> yield_symbols);
+    mlir::Type get_symbol_type(const std::string &var_name);
+
 //
 //    // This function serves as a utility for creating a MemRef and
 //    // corresponding AllocOp of a given 1d shape.

@@ -82,9 +82,6 @@ void MLIRGenerator::mlirgen(const std::string &src) {
   // Get the parse tree and visit
   tree::ParseTree *tree = parser.program();
   my_visitor->visitChildren(tree);
-  IntegerType i32 = builder.getI32Type();
-  IntegerAttr return_attr = IntegerAttr::get(i32, 0);
-  Value return_op = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), return_attr, i32);
-  builder.create<func::ReturnOp>(builder.getUnknownLoc(), return_op);
+  auto return_op = get_mlir_integer_val(builder, 0);
+  builder.create<func::ReturnOp>(builder.getUnknownLoc(), *return_op);
 }
-

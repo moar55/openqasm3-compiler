@@ -6639,7 +6639,7 @@ void qasmParser::QuantumGateCallContext::exitRule(tree::ParseTreeListener *liste
 
 std::any qasmParser::QuantumGateCallContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<qasmVisitor*>(visitor))
-    return parserVisitor->visitQuantumGateCall(this);
+      return parserVisitor->visitQuantumGateCall(this);
   else
     return visitor->visitChildren(this);
 }
