@@ -1,7 +1,8 @@
-
 #include "antlr4-runtime.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "symbol_table.hpp"
+
+using namespace mlir;
 
 void printErrorMessage(const std::string msg, bool do_exit) {
   std::cout << "\n[OPENQASM3 MLIRGen] Error\n" << msg << "\n\n";
@@ -68,7 +69,7 @@ int get_index_from_indexed_name(std::string var_name) {
 }
 
 int get_qubit_arr_size(mlir::Value qubit_ident) {
-  return qubit_ident.getDefiningOp<quantum::QallocOp>().sizeAttr().getInt();
+  return qubit_ident.getDefiningOp<quantum::QallocOp>().getSizeAttr().getInt();
 }
 
 std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val){ //TODO: maybe move to vistor class better?

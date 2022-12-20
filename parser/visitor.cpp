@@ -1,5 +1,12 @@
 #include "visitor.hpp"
-#include "mlir/Dialect/SCF/SCF.h"
+
+#include "antlr4-runtime.h"
+
+#include "Quantum/IR/QuantumDialect.h"
+#include <RestrictedQuantum/RestrictedQuantumDialect.h>
+#include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
 #include "Quantum/IR/QuantumOps.h"
 
 // The constructor, instantiates commonly used opaque types
@@ -41,5 +48,24 @@ mlir::Type visitor::get_symbol_type(const std::string &var_name) {
   printErrorMessage(("var " + var_name + " doesn't exist!"));
 }
 
-visitor::~visitor() {}
 
+
+//void traverse_and_populate_symbols_list(antlr4::ParserRuleContext *context, ScopedSymbolTable &symbol_table, std::set<std::string> &yield_symbols) {
+//  auto context = std::make_unique<MLIRContext>();
+//  context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
+//          scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
+//  OpBuilder shadow_builder(context.get());
+//
+//  symbol_table.enter_new_scope();
+//  // visit then scope nodes
+//  this->visitChildren(ctx->if_body);
+//  for (auto const& [symbol, val] : symbol_table.get_symbols_and_values_pair(symbol_table.get_current_scope())) { //TODO: refactor in a funciton
+//    if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope(), true)) {
+//      yield_symbols.insert(symbol);
+//    }
+//  }
+//  symbol_table.exit_scope();
+//}
+
+
+visitor::~visitor() {}

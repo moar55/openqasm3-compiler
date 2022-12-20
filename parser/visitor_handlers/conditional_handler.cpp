@@ -1,8 +1,8 @@
 #include "Quantum/IR/QuantumDialect.h"
 #include <RestrictedQuantum/RestrictedQuantumDialect.h>
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/SCF/SCF.h"
-#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 
 #include "expression_handler.h"
 #include "mlir/IR/BuiltinAttributes.h"
@@ -24,7 +24,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
   // -------------- begin shadow visit ----------------------------//
   //TODO: refactor in a function?
   auto context = std::make_unique<MLIRContext>();
-  context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithmeticDialect,
+  context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
             scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
   OpBuilder shadow_builder(context.get());
   std::set<std::string> yield_symbols;
@@ -60,8 +60,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
       yield_types.push_back(get_symbol_type(symbol));
   }
 
-  auto ifOp = builder.create<scf::IfOp>(builder.getUnknownLoc(), llvm::ArrayRef(yield_types), cond, hasElseBlock);
-
+  auto ifOp = builder.create<scf::IfOp>(builder.getUnknownLoc(), std::vector{yield_types}, cond, hasElseBlock);
   // Build the then part
   auto thenBodyBuilder = ifOp.getThenBodyBuilder();
   builder = thenBodyBuilder;

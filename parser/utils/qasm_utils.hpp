@@ -4,7 +4,7 @@
 
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Value.h"
-#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "../generated/qasmParser.h"
 
 class ScopedSymbolTable;

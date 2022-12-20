@@ -14,9 +14,10 @@ target_include_directories(quantum-opt
 target_link_libraries(quantum-opt
         PRIVATE
         MLIRAnalysis
-        MLIRMemRef
+        MLIRMemRefDialect
+        MLIRArithDialect
+        MLIRSCFDialect
         MLIRIR
-        MLIRArithmetic
         MLIRParser
         MLIRPass
         MLIRRewrite

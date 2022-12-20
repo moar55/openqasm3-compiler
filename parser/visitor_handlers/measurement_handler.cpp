@@ -1,5 +1,5 @@
 #include "../visitor.hpp"
-#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "../utils/qasm_utils.hpp"
 
 
@@ -22,7 +22,7 @@ mlir::Value get_or_create_constant_integer_value(
                       .create<mlir::quantum::IntegerCastOp>(
                               location, type,
                               builder.create<mlir::arith::ConstantOp>(location, integer_attr))
-                      .output();
+                      .getOutput();
       symbol_table.add_constant_integer(idx, ret, width);
       return ret;
     } else {

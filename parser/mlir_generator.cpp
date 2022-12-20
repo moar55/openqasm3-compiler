@@ -12,7 +12,7 @@
 
 #include "visitor.hpp"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "generated/qasmLexer.h"
 #include "generated/qasmParser.h"
 
@@ -23,7 +23,7 @@ void MLIRGenerator::initialize_mlirgen(
 
   llvm::StringRef name("quantum");
   StringAttr n = StringAttr::get(&context, name); // namespace
-  auto int_type = builder.getI32Type();
+  auto int_type = builder.getI64Type();
   auto argv_type =
           OpaqueType::get(n, llvm::StringRef("ArgvType"));
   std::vector<Type> arg_types_vec{int_type, argv_type};

@@ -73,7 +73,7 @@ std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *conte
                                                             builder.getStringAttr(qgn->getText()),
                                                             qubits, params);
 
-  auto it = inst.result().begin();
+  auto it = inst.getResult().begin();
   for (auto symbol: symbols) {
     symbol_table.add_symbol(symbol, *it, true);
     it = std::next(it);

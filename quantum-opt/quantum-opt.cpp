@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
   std::string qasm_src( (std::istreambuf_iterator<char>(ifs) ),
                         (std::istreambuf_iterator<char>() ));
   auto context = std::make_unique<MLIRContext>();
-  context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithmeticDialect,
+  context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
     scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
   std::shared_ptr<MLIRGenerator> mlir_generator = std::make_shared<MLIRGenerator>(*context);
   mlir_generator->initialize_mlirgen("main");

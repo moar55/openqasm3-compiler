@@ -1,5 +1,7 @@
 #pragma once
 
+#include "antlr4-runtime.h"
+
 #include <regex>
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
@@ -359,9 +361,7 @@ public:
       return visitChildren(ctx);
     }
 
-    std::any visitLoopStatement(qasmParser::LoopStatementContext *ctx) override {
-      return visitChildren(ctx);
-    }
+    std::any visitLoopStatement(qasmParser::LoopStatementContext *ctx) override;
 
     std::any visitEndStatement(qasmParser::EndStatementContext *ctx) override {
       return visitChildren(ctx);
@@ -437,6 +437,9 @@ public:
 
     void gen_yield_of_symbols(const std::set<std::string> yield_symbols);
     mlir::Type get_symbol_type(const std::string &var_name);
+    void traverse_and_populate_symbols_list(antlr4::ParserRuleContext *context, ScopedSymbolTable &symbol_table, std::set<std::string> &yield_symbols);
+
+
 
 //
 //    // This function serves as a utility for creating a MemRef and

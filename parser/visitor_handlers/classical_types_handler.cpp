@@ -1,5 +1,5 @@
 #include "expression_handler.h"
-#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 
 using namespace mlir;
 std::any visitor::visitSingleDesignatorDeclaration(

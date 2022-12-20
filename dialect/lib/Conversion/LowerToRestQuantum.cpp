@@ -1,7 +1,7 @@
 #include <iostream>
 #include <mlir/Dialect/MemRef/IR/MemRef.h>
 #include <mlir/Transforms/DialectConversion.h>
-#include <mlir/Dialect/Arithmetic/IR/Arithmetic.h>
+#include <mlir/Dialect/Arith/IR/Arith.h>
 #include <Quantum/IR/QuantumOps.h>
 #include "RestrictedQuantum/RestrictedQuantumOps.h"
 //#include "mlir/Pass/Pass.h"
@@ -52,9 +52,9 @@ public :
                                   ConversionPatternRewriter &rewriter) const override {
       //TODO: cleanup
       //TODO: maybe use enums for gate names
-      auto const gate_name = op.nameAttr().str();
+      auto const gate_name = op.getNameAttr().str();
       std::vector<std::pair<std::string, double>> rotation_gates_and_angles;
-      auto params = op.params();
+      auto params = op.getParams();
 
       if (gate_name == "H") {
         rotation_gates_and_angles = {std::pair{"ry", 90}, std::pair{"rx", 180}}; //Ry(90)Rx(180)
@@ -162,7 +162,7 @@ public:
       MLIRContext *context = &getContext();
       ConversionTarget target(*context);
       target.addLegalDialect<
-              memref::MemRefDialect,arith::ArithmeticDialect,
+              memref::MemRefDialect,arith::ArithDialect,
               quantum::QuantumDialect, restquantum::RestrictedQuantumDialect>();
       TypeConverter typeConverter;
       typeConverter.addConversion([](Type type) {return type;});

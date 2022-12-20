@@ -1,6 +1,6 @@
 #include "../visitor.hpp"
 #include "Quantum/IR/QuantumOps.h"
-#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "expression_handler.h"
 
 
