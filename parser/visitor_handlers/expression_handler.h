@@ -55,9 +55,9 @@ class qasm_expression_generator : public qasmBaseVisitor {
 //
 //    std::any visitBitAndExpression(qasmParser::BitAndExpressionContext *ctx) override;
 //
-//    std::any visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) override;
+    std::any visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) override;
 //
-//    std::any visitComparisonExpression(qasmParser::ComparisonExpressionContext *ctx) override;
+    std::any visitComparisonExpression(qasmParser::ComparisonExpressionContext *ctx) override;
 //
 //    std::any visitBitShiftExpression(qasmParser::BitShiftExpressionContext *ctx) override;
 //
@@ -76,4 +76,4 @@ class qasm_expression_generator : public qasmBaseVisitor {
 //    std::any visitIndexedIdentifier(qasmParser::IndexedIdentifierContext *ctx) override;
 
     std::any visitExpressionTerminator(qasmParser::ExpressionTerminatorContext *ctx) override;
-};
+    };

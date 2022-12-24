@@ -70,7 +70,7 @@ class ScopedSymbolTable;
     std::string get_quantum_type(mlir::Value);
     std::string get_indexed_name(std::string var_name, int index);
     int get_qubit_arr_size(mlir::Value qubit_ident);
-    std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val); //TODO: rename val
+    std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val, mlir::Type type); //TODO: rename val
     std::string get_name_from_indexed_name(std::string val_name);
     int get_index_from_indexed_name(std::string var_name);
 

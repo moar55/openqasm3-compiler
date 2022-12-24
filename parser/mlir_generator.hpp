@@ -47,8 +47,8 @@ public:
     void initialize_mlirgen(const std::string entry_function_name);
     void mlirgen(const std::string &src) ;
 
-    mlir::OwningOpRef<mlir::ModuleOp> get_module() {
-      return mlir::OwningOpRef<mlir::ModuleOp>(mlir::OwningOpRef<mlir::ModuleOp>(m_module));
+    mlir::ModuleOp get_module() {
+      return m_module;
     }
 
     mlir::OpBuilder get_builder() {

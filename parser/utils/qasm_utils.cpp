@@ -72,10 +72,9 @@ int get_qubit_arr_size(mlir::Value qubit_ident) {
   return qubit_ident.getDefiningOp<quantum::QallocOp>().getSizeAttr().getInt();
 }
 
-std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val){ //TODO: maybe move to vistor class better?
-  IntegerType i64 = builder.getI64Type();
-  auto attr = IntegerAttr::get(i64, val);
-  return std::make_unique<mlir::Value>(builder.create<arith::ConstantOp>(builder.getUnknownLoc(), attr, i64));
+std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val, mlir::Type type){ //TODO: maybe move to vistor class better?
+  auto attr = IntegerAttr::get(type, val);
+  return std::make_unique<mlir::Value>(builder.create<arith::ConstantOp>(builder.getUnknownLoc(), attr, type));
 }
 
 //    mlir::Location get_location(mlir::OpBuilder builder,

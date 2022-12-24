@@ -60,7 +60,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
       yield_types.push_back(get_symbol_type(symbol));
   }
 
-  auto ifOp = builder.create<scf::IfOp>(builder.getUnknownLoc(), std::vector{yield_types}, cond, hasElseBlock);
+  auto ifOp = builder.create<scf::IfOp>(builder.getUnknownLoc(), yield_types, cond, hasElseBlock);
   // Build the then part
   auto thenBodyBuilder = ifOp.getThenBodyBuilder();
   builder = thenBodyBuilder;
