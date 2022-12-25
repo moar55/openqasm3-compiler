@@ -1,4 +1,7 @@
 #include "mlir/Pass/PassManager.h"
+#include "mlir/Transforms/Passes.h"
+#include "mlir/IR/OperationSupport.h"
+
 #include <iostream>
 #include <mlir_generator.hpp>
 #include <fstream>

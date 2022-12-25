@@ -14,20 +14,38 @@ int main(int argc, char **argv) {
   mlir_generator.mlirgen(qasm_src);
   ModuleOp module = mlir_generator.get_module();
 //
+
+
+  mlir::OpPrintingFlags flags;
+  flags.printValueUsers();
+//  flags.enableDebugInfo();
+  flags.printGenericOpForm();
+// empty while loop doesn't work
+//  mlir::PassManager pm(module->getContext());
+//  pm.addPass(quantum::createConvertInstPass());
+//  pm.addPass(mlir::createCSEPass());
+//  pm.run(module);
   std::string s;
   llvm::raw_string_ostream os(s);
   module->print(os);
   os.flush();
   std::cout << s << std::endl;
+
+
 //
 //
   mlir::PassManager pm(module->getContext());
   pm.addPass(quantum::createConvertInstPass());
+  pm.addPass(mlir::createCSEPass());
   pm.run(module);
+
+//  LogicalResult::ver
+
 //
   std::string s2;
   llvm::raw_string_ostream os2(s2);
-  module->print(os2);
+
+  module->print(os2, flags);
   os2.flush();
   std::cout << s2 << std::endl;
 

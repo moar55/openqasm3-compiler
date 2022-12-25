@@ -17,10 +17,10 @@ void find_symbols(qasmParser::ExpressionContext *ctx, std::set<std::string> &sym
 
   // get tokens and
   antlr4::CharStream *input = ctx->start->getInputStream();
-  antlr4::misc::Interval intervl = antlr4::misc::Interval();
-  intervl.a = ctx->getStart()->getStartIndex();
-  intervl.b = ctx->getStop()->getStopIndex();
-  std::string condStr = input->getText(intervl);
+  antlr4::misc::Interval intrvl = antlr4::misc::Interval();
+  intrvl.a = ctx->getStart()->getStartIndex();
+  intrvl.b = ctx->getStop()->getStopIndex();
+  std::string condStr = input->getText(intrvl);
   antlr4::ANTLRInputStream cond(condStr);
   qasmLexer lex(&cond);
   auto tokens = lex.getAllTokens();
@@ -37,8 +37,9 @@ std::any visitor::visitLoopStatement(qasmParser::LoopStatementContext *ctx) {
   if (signature->getStart()->getText() == "while") {
     auto cond = signature->expression();
     // get the identifier symbols needed in the condition
-//    std::set<std::string> symbols;
-//    find_symbols(cond, symbols);
+    std::set<std::string> symbols;
+    find_symbols(cond, symbols); //TODO: find a single symbol?
+    auto cond_type = symbol_table.get_symbol(*symbols.begin()).getType();
 //    std::vector<Value> symbols_values;
 //    std::vector<Type> symbols_types;
 //
@@ -102,7 +103,7 @@ std::any visitor::visitLoopStatement(qasmParser::LoopStatementContext *ctx) {
                         }
 
                         // fix this
-                        qasm_expression_generator generator(beforeBuilder, symbol_table, beforeBuilder.getI32Type());
+                        qasm_expression_generator generator(beforeBuilder, symbol_table, cond_type);
                         generator.visitExpression(cond);
 //                        auto type = beforeBuilder.getI1Type();
 //                        auto intr = IntegerAttr::get(type, 1);

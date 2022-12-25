@@ -33,7 +33,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
   symbol_table.enter_new_scope();
   // visit then scope nodes
   this->visitChildren(ctx->if_body);
-  for (auto const& [symbol, val] : symbol_table.get_symbols_and_values_pair(symbol_table.get_current_scope())) { //TODO: refactor in a funciton
+  for (auto const& [symbol, val] : symbol_table.get_symbols_and_values_pair(symbol_table.get_current_scope())) { //TODO: refactor in a function
     if (symbol_table.has_symbol(symbol, symbol_table.get_parent_scope(), true)) {
       yield_symbols.insert(symbol);
     }

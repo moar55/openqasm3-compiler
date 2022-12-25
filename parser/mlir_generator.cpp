@@ -24,11 +24,8 @@ void MLIRGenerator::initialize_mlirgen(
   llvm::StringRef name("quantum");
   StringAttr n = StringAttr::get(&context, name); // namespace
   auto int_type = builder.getI64Type();
-  auto argv_type =
-          OpaqueType::get(n, llvm::StringRef("ArgvType"));
-  std::vector<Type> arg_types_vec{int_type, argv_type};
   auto func_type =
-          builder.getFunctionType(llvm::makeArrayRef(arg_types_vec), int_type);
+          builder.getFunctionType({}, int_type);
   auto proto =
           func::FuncOp::create(builder.getUnknownLoc(), entry_function_name, func_type);
   func::FuncOp function(proto);
