@@ -47,58 +47,45 @@ std::any visitor::visitQuantumMeasurement(
   return {};
 }
 
-mlir::Value get_or_extract_qubit(const std::string &qreg_name,
-                                 const std::size_t idx, mlir::Location location,
-                                 ScopedSymbolTable &symbol_table,
-                                 mlir::OpBuilder &builder) {
-  auto key = symbol_table.array_qubit_symbol_name(qreg_name, idx);
-  if (symbol_table.has_symbol(key)) {
-    // Check if the cached qubit SSA var dominance properties in the current
-    // scope:
-    mlir::Value qubit_value = symbol_table.get_symbol(key);
-    if (!symbol_table.verify_qubit_ssa_dominance_property(
-            qubit_value, builder.getInsertionBlock())) {
-      // The cache SSA value is not valid:
-      symbol_table.erase_symbol(key);
-      return get_or_extract_qubit(qreg_name, idx, location, symbol_table,
-                                  builder);
-    } else {
-      return qubit_value;
-    }
-  } else {
-    auto qubit = symbol_table.get_symbol(qreg_name);
-//    mlir::Value pos = get_or_create_constant_integer_value(
-//            idx, location, builder.getI64Type(), symbol_table, builder);
-//    auto value = builder.create<mlir::quantum::ExtractQubitOp>(
-//            location, get_custom_opaque_type("Qubit", builder.getContext()), qubits,
-//            pos);
-//    symbol_table.add_symbol(key, value);
-    return qubit;
-  }
-}
-
-
 std::any visitor::visitQuantumMeasurementAssignment(
         qasmParser::QuantumMeasurementAssignmentContext* context) {
-  StringAttr str_attr = builder.getStringAttr("mz");
-  auto measured_qreg = context->quantumMeasurement()->indexedIdentifier()->Identifier()->getText();
-  auto extract_qubit = get_or_extract_qubit(measured_qreg, 0, builder.getUnknownLoc(),
-                                            symbol_table, builder);
-  auto bit_variable_name =
-          context->indexedIdentifier()->Identifier()->getText();
-  auto bit_value = symbol_table.get_symbol(bit_variable_name);
-  auto instop = builder.create<mlir::quantum::InstOp>(
-          builder.getUnknownLoc(), result_type, str_attr,
-          llvm::makeArrayRef(extract_qubit),
-          llvm::makeArrayRef(std::vector<mlir::Value>{}));
-//  auto cast_bit_op = builder.create<mlir::quantum::ResultCastOp>(
-//          builder.getUnknownLoc(), builder.getIntegerType(1), instop.bit());
-//
-//  auto index_attr = builder.getIndexAttr(0);
-//  auto bit_idx_val = builder.create<mlir::arith::ConstantOp>(builder.getUnknownLoc(), index_attr);
-//  builder.create<mlir::memref::StoreOp>(
-//          builder.getUnknownLoc(), cast_bit_op.bit_result(), bit_value,
-//          llvm::makeArrayRef(std::vector<mlir::Value>{bit_idx_val}));
-//  symbol_table.invalidate_qubit_extracts(measured_qreg, {0});
+  auto indexed_identifier = context->quantumMeasurement()->indexedIdentifier();
+  auto qubit_var_name = indexed_identifier->Identifier()->getText();
+  auto qubit_ident = symbol_table.get_symbol(qubit_var_name);
+  auto is_single_qubit = qubit_ident.getType().dyn_cast<mlir::OpaqueType>().getTypeData() == "Qubit";
+  std::vector<Value> qubits_to_be_measured;
+  bool indexed = !indexed_identifier->indexOperator().empty();
+
+  if (is_single_qubit && indexed) {
+    printErrorMessage("can't index a single qubit", context);
+  }
+  int allocation_size;
+  if (!is_single_qubit) {
+    allocation_size = get_qubit_arr_size(qubit_ident);
+    if (indexed) {
+      auto index_expression = indexed_identifier->indexOperator().front()->expression(0);
+      try {
+        auto index = std::stoi(index_expression->getText()); //TODO: refactor into a function
+        if ( index < 0 || index > allocation_size - 1) { //check that indexing is not out of bounds
+          printErrorMessage("index out of bound for indexing variable " + qubit_var_name);
+        }
+        auto qubit = get_or_extrct_qubit(symbol_table, qubit_var_name, index, &builder, &qubit_type);
+        qubits_to_be_measured.push_back(qubit);
+      } catch(...) {
+        printErrorMessage("currently only constant integer indices are supported", context);
+      }
+    } else {
+      for (int i = 0; i < allocation_size; i++) {
+        auto qubit = get_or_extrct_qubit(symbol_table, qubit_var_name, i, &builder, &qubit_type);
+        qubits_to_be_measured.push_back(qubit);
+      }
+    }
+
+  } else {
+    qubits_to_be_measured.push_back(symbol_table.get_symbol(qubit_var_name));
+    allocation_size = 1;
+  }
+  std::vector<Type> types(allocation_size, builder.getI1Type());
+  builder.create<quantum::MzOp>(builder.getUnknownLoc(), types, qubits_to_be_measured);
   return {};
 }

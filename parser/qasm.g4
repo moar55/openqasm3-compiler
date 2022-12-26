@@ -446,7 +446,7 @@ booleanLiteral
     ;
 
 builtInCall
-    : ( builtInMath | castOperator | SIZEOF) LPAREN expressionList RPAREN
+    : ( builtInMath | castOperator | SIZEOF | PRINT) LPAREN expressionList RPAREN
     ;
 
 builtInMath
@@ -641,6 +641,7 @@ CONST: 'const';
 MUTABLE: 'mutable';
 ARRAY: 'array';
 SIZEOF: 'sizeof';
+PRINT: 'print';
 DIM: '#dim';
 
 Constant : ( 'pi' | 'π' | 'tau' | '𝜏' | 'euler' | 'ℇ' );

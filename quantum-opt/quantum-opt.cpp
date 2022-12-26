@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   mlir::OpPrintingFlags flags;
   flags.printValueUsers();
 //  flags.enableDebugInfo();
-  flags.printGenericOpForm();
+//  flags.printGenericOpForm();
 // empty while loop doesn't work
 //  mlir::PassManager pm(module->getContext());
 //  pm.addPass(quantum::createConvertInstPass());

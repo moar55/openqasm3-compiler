@@ -24,6 +24,11 @@ def InstOp : QuantumOp<"inst", [AttrSizedOperandSegments]> {
     let results = (outs Optional<ResultType>:$bit);
 }
 
+def MzOp: QuantumOp<"mz"> {
+    let arguments = (ins Variadic<QubitType>: $qubits);
+    let results = (outs Variadic<I1>: $bits_result);
+}
+
 def ValueSemanticsInstOp : QuantumOp<"value_inst", [AttrSizedOperandSegments]> {
     let arguments = (ins StrAttr:$name, Variadic<QubitType>:$qubits, Variadic<F64>:$params);
     let results = (outs Variadic<AnyTypeOf<[ResultType, QubitType]>>:$result);

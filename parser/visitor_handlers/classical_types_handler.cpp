@@ -1,5 +1,6 @@
 #include "expression_handler.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/Tensor/IR/Tensor.h"
 
 using namespace mlir;
 std::any visitor::visitSingleDesignatorDeclaration(
@@ -7,7 +8,7 @@ std::any visitor::visitSingleDesignatorDeclaration(
   //TODO: make sure a variable is not redeclared!
   auto type = context->singleDesignatorType()->getText();
   auto designator_expr = context->designator()->expression();
-  auto width_idx = std::stoi(designator_expr->getText());
+  auto width_idx = std::stoi(designator_expr->getText()); //TODO: catch non const int values
 
   Attribute init_attr;
   Type value_type;
@@ -70,13 +71,41 @@ std::any visitor::visitBitDeclaration(
 
 
   llvm::ArrayRef<int64_t> shaperef{};
-  auto mem_type = MemRefType::get(shaperef, builder.getI1Type());
-  Value allocation = builder.create<memref::AllocaOp>(builder.getUnknownLoc(), mem_type);
-  auto integer_type = builder.getI1Type();
-  auto integer_attr = IntegerAttr::get(integer_type, 0);
-  auto value = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), integer_attr, integer_type);
-  builder.create<memref::StoreOp>(builder.getUnknownLoc(), value, allocation);
-  symbol_table.add_symbol(context->Identifier()->getText(), allocation);
+  int size;
+  if (context->designator()) {
+    try {
+      size = std::stoi(context->designator()->expression()->getText());
+    } catch(...) {
+      printErrorMessage("currently only constant integers are supported as desingator indices");
+    }
+  } else {
+    size = 1;
+  }
+//  Value mlir_vector;
+//  if (!context->equalsExpression()) {
+
+    auto default_val = get_mlir_integer_val(builder, 0, builder.getI1Type()); // TODO: check if nested regions commen expressions are eleminated
+    ArrayRef<int64_t> shape {size};
+    auto memref = builder.create<memref::AllocOp>(builder.getUnknownLoc(), MemRefType::get(shape, builder.getI1Type()));
+    auto default_val2 = get_mlir_integer_val(builder, 0, builder.getIndexType());
+    auto val3 = builder.create<memref::LoadOp>(builder.getUnknownLoc(), memref, default_val2); //
+    builder.create<arith::ExtUIOp>(builder.getUnknownLoc(), builder.getI32Type(), val3);
+//    for (int i = 0; i < size; i++) {
+//
+//    }
+//    auto tensor = builder.create<tensor::EmptyOp>(builder.getUnknownLoc(), shape, builder.getI1Type());
+//    auto val = builder.create<linalg::FillOp>(builder.getUnknownLoc(), {default_val}, {tensor});
+//  }
+//  auto vector_type = VectorType::get({size}, builder.getI1Type());
+//  auto vector_attr = DenseIntElementsAttr::get(vector_type, std::vector<int>(size, 0));
+//  auto mlir_vector = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), vector_attr, vector_type);
+  //  auto mem_type = MemRefType::get(shaperef, builder.getI1Type());
+//  Value allocation = builder.create<memref::AllocaOp>(builder.getUnknownLoc(), mem_type);
+//  auto integer_type = builder.getI1Type();
+//  auto integer_attr = IntegerAttr::get(integer_type, 0);
+//  auto value = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), integer_attr, integer_type);
+//  builder.create<memref::StoreOp>(builder.getUnknownLoc(), value, allocation);
+//  symbol_table.add_symbol(context->Identifier()->getText(), mlir_vector);
   return 0;
 }
 

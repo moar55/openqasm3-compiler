@@ -86,7 +86,7 @@ std::any qasm_expression_generator::visitAdditiveExpression(qasmParser::Additive
     Value val;
     if (internal_value_type.isa<IntegerType>()) {
       if (ctx->MINUS()) {
-        rhs = builder.create<arith::MulIOp>(location, rhs, *get_mlir_integer_val(builder, -1, internal_value_type));
+        rhs = builder.create<arith::MulIOp>(location, rhs, get_mlir_integer_val(builder, -1, internal_value_type));
         location = builder.getUnknownLoc();
       }
       val = createOp<arith::AddIOp>(location, lhs, rhs);

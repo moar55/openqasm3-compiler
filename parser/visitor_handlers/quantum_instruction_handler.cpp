@@ -37,16 +37,9 @@ std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *conte
         if ( idx < 0 || idx > allocation_size - 1) { //check that indexing is not out of bounds
           printErrorMessage("index out of bound for indexing variable " + qubit_var_name);
         }
+        auto qubit = get_or_extrct_qubit(symbol_table, qubit_var_name, idx, &builder, &qubit_type);
+        qubits.push_back(qubit);
         auto indexed_name = get_indexed_name(qubit_var_name, idx);
-        if (symbol_table.has_symbol(indexed_name)) { // qubit extracted from register before
-          qubits.push_back(symbol_table.get_symbol(indexed_name));
-        } else {
-          auto generator = qasm_expression_generator(builder, symbol_table, builder.getI32Type());
-          generator.visitExpression(index_expression);
-          Value pos = generator.current_value;
-          auto qubit = builder.create<quantum::ExtractQubitOp>(builder.getUnknownLoc(), qubit_type, qubit_ident, pos);
-          qubits.push_back(qubit);
-          }
         symbols.push_back(indexed_name);
       } catch(...) {
           printErrorMessage("currently only constant integer indices are supported", context);

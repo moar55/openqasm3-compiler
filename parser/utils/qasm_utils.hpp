@@ -44,11 +44,6 @@ class ScopedSymbolTable;
     mlir::Type get_custom_opaque_type(const std::string& type,
                                       mlir::MLIRContext* context);
 
-    mlir::Value get_or_extract_qubit(const std::string &qreg_name,
-                                     const std::size_t idx, mlir::Location location,
-                                     ScopedSymbolTable &symbol_table,
-                                     mlir::OpBuilder &builder);
-
     mlir::Value get_or_create_constant_integer_value(
             const std::size_t idx, mlir::Location location, mlir::Type int_like_type,
             ScopedSymbolTable& symbol_table, mlir::OpBuilder& builder);
@@ -70,10 +65,12 @@ class ScopedSymbolTable;
     std::string get_quantum_type(mlir::Value);
     std::string get_indexed_name(std::string var_name, int index);
     int get_qubit_arr_size(mlir::Value qubit_ident);
-    std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val, mlir::Type type); //TODO: rename val
+    mlir::Value get_mlir_integer_val(mlir::OpBuilder &builder, int val, mlir::Type type); //TODO: rename val
     std::string get_name_from_indexed_name(std::string val_name);
     int get_index_from_indexed_name(std::string var_name);
 
+mlir::Value get_or_extrct_qubit(ScopedSymbolTable &symbol_table, const std::string &qubit_var_name,
+                                const int &index, mlir::OpBuilder *builder = nullptr, const mlir::Type *qubit_type = nullptr);
     extern std::map<std::string, mlir::arith::CmpIPredicate> antlr_to_mlir_predicate;
     extern std::map<std::string, mlir::arith::CmpFPredicate> antlr_to_mlir_fpredicate;
 

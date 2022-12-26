@@ -72,9 +72,9 @@ int get_qubit_arr_size(mlir::Value qubit_ident) {
   return qubit_ident.getDefiningOp<quantum::QallocOp>().getSizeAttr().getInt();
 }
 
-std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int val, mlir::Type type){ //TODO: maybe move to vistor class better?
+mlir::Value get_mlir_integer_val(mlir::OpBuilder &builder, int val, mlir::Type type){ //TODO: maybe move to vistor class better?
   auto attr = IntegerAttr::get(type, val);
-  return std::make_unique<mlir::Value>(builder.create<arith::ConstantOp>(builder.getUnknownLoc(), attr, type));
+  return builder.create<arith::ConstantOp>(builder.getUnknownLoc(), attr, type);
 }
 
 //    mlir::Location get_location(mlir::OpBuilder builder,
@@ -323,3 +323,21 @@ std::unique_ptr<mlir::Value> get_mlir_integer_val(mlir::OpBuilder &builder, int 
 //            {"==", mlir::CmpFPredicate::OEQ}, {"!=", mlir::CmpFPredicate::ONE},
 //            {"<=", mlir::CmpFPredicate::OLE}, {">=", mlir::CmpFPredicate::OGE},
 //            {"<", mlir::CmpFPredicate::OLT},  {">", mlir::CmpFPredicate::OGT}};
+
+
+mlir::Value get_or_extrct_qubit(ScopedSymbolTable &symbol_table, const std::string &qubit_var_name,
+                                const int &index, mlir::OpBuilder *builder, const mlir::Type *qubit_type) {
+  auto indexed_name = get_indexed_name(qubit_var_name, index);
+  if (symbol_table.has_symbol(indexed_name)) { // qubit extracted from register before
+    return symbol_table.get_symbol(indexed_name);
+  } else {
+    if (!builder || !qubit_type) {
+      printErrorMessage(("builder and qubit type can't be null when indexed name doesn't exist!"));
+    }
+    auto qubit_ident = symbol_table.get_symbol(qubit_var_name);
+    auto pos = get_mlir_integer_val(*builder, index, builder->getI32Type());
+    auto qubit = builder->create<quantum::ExtractQubitOp>(builder->getUnknownLoc(), *qubit_type, qubit_ident, pos);
+    symbol_table.add_symbol(indexed_name, qubit);
+    return qubit;
+  }
+}

@@ -21,8 +21,6 @@ using namespace mlir;
 void MLIRGenerator::initialize_mlirgen(
         const std::string entry_function_name) {
 
-  llvm::StringRef name("quantum");
-  StringAttr n = StringAttr::get(&context, name); // namespace
   auto int_type = builder.getI64Type();
   auto func_type =
           builder.getFunctionType({}, int_type);
@@ -80,5 +78,5 @@ void MLIRGenerator::mlirgen(const std::string &src) {
   tree::ParseTree *tree = parser.program();
   my_visitor->visitChildren(tree);
   auto return_op = get_mlir_integer_val(builder, 0, builder.getI64Type());
-  builder.create<func::ReturnOp>(builder.getUnknownLoc(), *return_op);
+  builder.create<func::ReturnOp>(builder.getUnknownLoc(), return_op);
 }

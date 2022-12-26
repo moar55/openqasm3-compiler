@@ -27,7 +27,7 @@ std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext 
   if (size == 1) {
     auto pos = get_mlir_integer_val(builder, 0, builder.getI64Type());
     allocation = builder.create<quantum::ExtractQubitOp>(
-          builder.getUnknownLoc(), qubit_type, allocation, *pos);
+          builder.getUnknownLoc(), qubit_type, allocation, pos);
   }
   symbol_table.add_symbol(var_name, allocation);
   return {};

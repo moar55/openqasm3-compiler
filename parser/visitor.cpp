@@ -29,7 +29,7 @@ void visitor::gen_yield_of_symbols(const std::set<std::string> yield_symbols) {
       auto idx_val = get_mlir_integer_val(builder, idx, builder.getI64Type());
       auto indexless_symbol = get_name_from_indexed_name(symbol);
       auto qubit_arr = symbol_table.get_symbol(indexless_symbol);
-      mlir::Value qubit = builder.create<quantum::ExtractQubitOp>(builder.getUnknownLoc(), qubit_type, qubit_arr, *idx_val);
+      mlir::Value qubit = builder.create<quantum::ExtractQubitOp>(builder.getUnknownLoc(), qubit_type, qubit_arr, idx_val);
       symbol_table.add_symbol(symbol, qubit); // TODO: check if  this line is unnecessary
       builder.create<scf::YieldOp>(builder.getUnknownLoc(), qubit);
     }

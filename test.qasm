@@ -1,17 +1,18 @@
 OPENQASM 3.0;
-int [24] x = 10;
-int [24] y = 20;
-qubit q;
-while(y > 0) {
- int[24] z = 12;
- while (z < 20) {
-    z = z + 1;
-    y = y + 1;
-    X q;
- }
- x = x + z;
-}
-y = y + x;
-qubit z;
-H z;
-CX q, z;
+bit[1] c;
+  GNU nano 4.8                                                                                                                                              test.mlir                                                                                                                                                        "builtin.module"() ({
+  "func.func"() ({
+    %1 = memref.alloc() : memref<5xi1>
+    %2 = "arith.constant"() {value = 1 : index} : () -> index
+    %12 = memref.load %1[%2] : memref<5xi1>
+    %13 = arith.extui %12 : i1 to i32
+    "func.return"(%13) : (i32) -> ()
+  }) {function_type = () -> i32, sym_name = "main"} : () -> ()
+}) : () -> ()
+
+
+
+
+
+
+ mlir-opt --convert-func-to-llvm --convert-vector-to-llvm --convert-arith-to-llvm test.mlir | mlir-cpu-runner --entry-point-result=i32 -shared-libs=/usr/local/lib/libmlir_runner_untis.so
