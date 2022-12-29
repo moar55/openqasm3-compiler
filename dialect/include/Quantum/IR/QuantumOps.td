@@ -25,8 +25,8 @@ def InstOp : QuantumOp<"inst", [AttrSizedOperandSegments]> {
 }
 
 def MzOp: QuantumOp<"mz"> {
-    let arguments = (ins Variadic<QubitType>: $qubits);
-    let results = (outs Variadic<I1>: $bits_result);
+    let arguments = (ins QubitType: $qubit);
+    let results = (outs I1: $bit_result);
 }
 
 def ValueSemanticsInstOp : QuantumOp<"value_inst", [AttrSizedOperandSegments]> {

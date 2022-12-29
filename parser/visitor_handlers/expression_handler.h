@@ -49,11 +49,11 @@ class qasm_expression_generator : public qasmBaseVisitor {
 
 //    std::any visitLogicalAndExpression(qasmParser::LogicalAndExpressionContext *ctx) override;
 //
-//    std::any visitBitOrExpression(qasmParser::BitOrExpressionContext *ctx) override;
+    std::any visitBitOrExpression(qasmParser::BitOrExpressionContext *ctx) override;
 //
-//    std::any visitXOrExpression(qasmParser::XOrExpressionContext *ctx) override;
-//
-//    std::any visitBitAndExpression(qasmParser::BitAndExpressionContext *ctx) override;
+    std::any visitXOrExpression(qasmParser::XOrExpressionContext *ctx) override;
+
+    std::any visitBitAndExpression(qasmParser::BitAndExpressionContext *ctx) override;
 //
     std::any visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) override;
 //

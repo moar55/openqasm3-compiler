@@ -68,7 +68,7 @@ std::any qasm_expression_generator::visitExpressionTerminator(qasmParser::Expres
       return {};
     }
     default:
-      return {};
+      return this->visitChildren(ctx);
   }
 }
 
@@ -84,9 +84,13 @@ std::any qasm_expression_generator::visitAdditiveExpression(qasmParser::Additive
     this->visitMultiplicativeExpression(ctx->multiplicativeExpression());
     auto rhs = current_value;
     Value val;
-    if (internal_value_type.isa<IntegerType>()) {
+    if (internal_value_type.isa<IntegerType>() || internal_value_type.isa<VectorType>()) { //TODO: handle when vector is not an integer vector
       if (ctx->MINUS()) {
-        rhs = builder.create<arith::MulIOp>(location, rhs, get_mlir_integer_val(builder, -1, internal_value_type));
+        if (internal_value_type.isa<VectorType>()) {
+          rhs = builder.create<arith::MulIOp>(location, rhs, get_mlir_integer_val(builder, -1, builder.getI1Type()));
+        } else {
+          rhs = builder.create<arith::MulIOp>(location, rhs, get_mlir_integer_val(builder, -1, internal_value_type));
+        }
         location = builder.getUnknownLoc();
       }
       val = createOp<arith::AddIOp>(location, lhs, rhs);
@@ -110,7 +114,7 @@ std::any qasm_expression_generator::visitMultiplicativeExpression(qasmParser::Mu
       this->visitUnaryExpression(ctx->unaryExpression());
       auto rhs = current_value;
       Value val;
-      if (internal_value_type.isa<IntegerType>()) {
+      if (internal_value_type.isa<IntegerType>() || internal_value_type.isa<VectorType>()) { //TODO: handle when vector is not an integer vector
         val = createOp<arith::MulIOp>(location, lhs, rhs);
       } else if (internal_value_type.isa<FloatType>()){
         val = createOp<arith::MulFOp>(location, lhs, rhs);
@@ -123,6 +127,87 @@ std::any qasm_expression_generator::visitMultiplicativeExpression(qasmParser::Mu
     }
     return {};
   }
+
+std::any qasm_expression_generator::visitBitOrExpression(qasmParser::BitOrExpressionContext *ctx) {
+  auto _xor = ctx->xOrExpression();
+  // TODO: handle float types
+  if (auto _or = ctx->bitOrExpression()) {
+    this->visitBitOrExpression(_or);
+    auto lhs = current_value;
+    this->visitXOrExpression(_xor);
+    auto rhs = current_value;
+    auto val = builder.create<arith::OrIOp>(builder.getUnknownLoc(), lhs, rhs);
+    update_current_value(val);
+  } else {
+    this->visitXOrExpression(_xor);
+  }
+  return {};
+}
+
+std::any qasm_expression_generator::visitXOrExpression(qasmParser::XOrExpressionContext *ctx) {
+  auto bit_and = ctx->bitAndExpression();
+  // TODO: handle float types
+  if (auto _xor = ctx->xOrExpression()) {
+    this->visitXOrExpression(_xor);
+    auto lhs = current_value;
+    this->visitBitAndExpression(bit_and);
+    auto rhs = current_value;
+    auto val = builder.create<arith::XOrIOp>(builder.getUnknownLoc(), lhs, rhs);
+    update_current_value(val);
+  } else {
+    this->visitBitAndExpression(bit_and);
+  }
+  return {};
+}
+
+std::any qasm_expression_generator::visitBitAndExpression(qasmParser::BitAndExpressionContext *ctx) {
+  auto eq_expr = ctx->equalityExpression();
+  //TODO: handle float types
+  if (auto bit_and = ctx->bitAndExpression()) {
+    this->visitBitAndExpression(bit_and);
+    auto lhs = current_value;
+    this->visitEqualityExpression(eq_expr);
+    auto rhs = current_value;
+    auto val = builder.create<arith::AndIOp>(builder.getUnknownLoc(), lhs, rhs);
+    update_current_value(val);
+  } else {
+    this->visitEqualityExpression(eq_expr);
+  }
+  return {};
+}
+
+
+std::any qasm_expression_generator::visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) {
+  if (ctx->equalityExpression()) {
+    this->visitEqualityExpression(ctx->equalityExpression());
+    auto lhs = this->current_value;
+    this->visitComparisonExpression(ctx->comparisonExpression());
+    auto rhs = this->current_value;
+    auto operator_str = ctx->equalityOperator()->getText();
+    auto type = lhs.getType();     //TODO: handle different types and signed vs unsigned
+
+    using namespace arith;
+    if (type.isa<IntegerType>()) {
+      std::map<std::string, CmpIPredicate> opeartor_to_comp_type = {
+              {"==",  CmpIPredicate::eq},
+              {"!=",  CmpIPredicate::ne}
+      };
+      auto val = builder.create<arith::CmpIOp>(builder.getUnknownLoc(), opeartor_to_comp_type[operator_str], lhs, rhs);
+      update_current_value(val);
+    } else if(type.isa<FloatType>()){
+      std::map<std::string, CmpFPredicate> opeartor_to_comp_type = {
+              {"==",  CmpFPredicate::OEQ},
+              {"!=",  CmpFPredicate::ONE}
+      };
+      auto val = builder.create<arith::CmpFOp>(builder.getUnknownLoc(), opeartor_to_comp_type[operator_str], lhs, rhs);
+      update_current_value(val);
+    }
+  } else {
+    this->visitComparisonExpression(ctx->comparisonExpression());
+  }
+  return {};
+}
+
 
 std::any qasm_expression_generator::visitComparisonExpression(qasmParser::ComparisonExpressionContext *ctx) {
   if (ctx->comparisonExpression()) {
@@ -156,38 +241,9 @@ std::any qasm_expression_generator::visitComparisonExpression(qasmParser::Compar
       update_current_value(val);
     }
   } else {
-      this->visitBitShiftExpression(ctx->bitShiftExpression());
+    this->visitBitShiftExpression(ctx->bitShiftExpression());
   }
   return {};
 }
 
-std::any qasm_expression_generator::visitEqualityExpression(qasmParser::EqualityExpressionContext *ctx) {
-  if (ctx->equalityExpression()) {
-    this->visitEqualityExpression(ctx->equalityExpression());
-    auto lhs = this->current_value;
-    this->visitComparisonExpression(ctx->comparisonExpression());
-    auto rhs = this->current_value;
-    auto operator_str = ctx->equalityOperator()->getText();
-    auto type = lhs.getType();     //TODO: handle different types and signed vs unsigned
 
-    using namespace arith;
-    if (type.isa<IntegerType>()) {
-      std::map<std::string, CmpIPredicate> opeartor_to_comp_type = {
-              {"==",  CmpIPredicate::eq},
-              {"!=",  CmpIPredicate::ne}
-      };
-      auto val = builder.create<arith::CmpIOp>(builder.getUnknownLoc(), opeartor_to_comp_type[operator_str], lhs, rhs);
-      update_current_value(val);
-    } else if(type.isa<FloatType>()){
-      std::map<std::string, CmpFPredicate> opeartor_to_comp_type = {
-              {"==",  CmpFPredicate::OEQ},
-              {"!=",  CmpFPredicate::ONE}
-      };
-      auto val = builder.create<arith::CmpFOp>(builder.getUnknownLoc(), opeartor_to_comp_type[operator_str], lhs, rhs);
-      update_current_value(val);
-    }
-  } else {
-    this->visitComparisonExpression(ctx->comparisonExpression());
-  }
-  return {};
-}

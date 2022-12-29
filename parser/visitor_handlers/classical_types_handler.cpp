@@ -84,31 +84,23 @@ std::any visitor::visitBitDeclaration(
 //  Value mlir_vector;
 //  if (!context->equalsExpression()) {
 
-    auto default_val = get_mlir_integer_val(builder, 0, builder.getI1Type()); // TODO: check if nested regions commen expressions are eleminated
-    ArrayRef<int64_t> shape {size};
-    auto memref = builder.create<memref::AllocOp>(builder.getUnknownLoc(), MemRefType::get(shape, builder.getI1Type()));
-    auto default_val2 = get_mlir_integer_val(builder, 0, builder.getIndexType());
-    auto val3 = builder.create<memref::LoadOp>(builder.getUnknownLoc(), memref, default_val2); //
-    builder.create<arith::ExtUIOp>(builder.getUnknownLoc(), builder.getI32Type(), val3);
-//    for (int i = 0; i < size; i++) {
-//
-//    }
-//    auto tensor = builder.create<tensor::EmptyOp>(builder.getUnknownLoc(), shape, builder.getI1Type());
-//    auto val = builder.create<linalg::FillOp>(builder.getUnknownLoc(), {default_val}, {tensor});
-//  }
-//  auto vector_type = VectorType::get({size}, builder.getI1Type());
-//  auto vector_attr = DenseIntElementsAttr::get(vector_type, std::vector<int>(size, 0));
-//  auto mlir_vector = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), vector_attr, vector_type);
-  //  auto mem_type = MemRefType::get(shaperef, builder.getI1Type());
-//  Value allocation = builder.create<memref::AllocaOp>(builder.getUnknownLoc(), mem_type);
-//  auto integer_type = builder.getI1Type();
-//  auto integer_attr = IntegerAttr::get(integer_type, 0);
-//  auto value = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), integer_attr, integer_type);
-//  builder.create<memref::StoreOp>(builder.getUnknownLoc(), value, allocation);
-//  symbol_table.add_symbol(context->Identifier()->getText(), mlir_vector);
+  auto identifier_name = context->Identifier()->getText();
+  if (context->equalsExpression()) {
+    printErrorMessage("declarative initalization of bits is not yet supported");
+  } else {
+    Value val;
+    if (size == 1) {
+        val = get_mlir_integer_val(builder, 0, builder.getI1Type());
+      } else {
+      ArrayRef<int64_t> shape {size};
+      auto vector_type = VectorType::get(shape, builder.getI1Type());
+      auto attr = DenseIntElementsAttr::get(vector_type, false);
+      val = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), attr, vector_type);
+    }
+    symbol_table.add_symbol(identifier_name, val);
+  }
   return 0;
 }
-
 
 std::any visitor::visitClassicalAssignment(qasmParser::ClassicalAssignmentContext *ctx) {
   auto identifier = ctx->indexedIdentifier()->Identifier();
@@ -121,6 +113,12 @@ std::any visitor::visitClassicalAssignment(qasmParser::ClassicalAssignmentContex
   Value identifier_val = symbol_table.get_symbol(identifier_text);
   qasm_expression_generator generator(builder, symbol_table, identifier_val.getType());
   generator.visitExpression(ctx->expression());
+  if (identifier_val.getType() != generator.current_value.getType()) {
+    if (!identifier_val.getType().isa<VectorType>() || !generator.current_value.getType().isa<VectorType>() ||
+            (identifier_val.getType().dyn_cast<VectorType>()).getShape()[0] < generator.current_value.getType().dyn_cast<VectorType>().getShape()[0]) { //TODO: make this more accomodating
+      printErrorMessage("mismatch of type/dimension between evaluated expression, and variable assigned to", ctx);
+    }
+  }
   symbol_table.add_symbol(identifier_text, generator.current_value, true);
   return {};
 }

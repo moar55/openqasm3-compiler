@@ -33,9 +33,10 @@ public:
     LPAREN = 104, RPAREN = 105, COLON = 106, SEMICOLON = 107, DOT = 108, 
     COMMA = 109, EQUALS = 110, ARROW = 111, PLUS = 112, MINUS = 113, MUL = 114, 
     DIV = 115, MOD = 116, IMAG = 117, ImagNumber = 118, COMPLEX = 119, HASH = 120, 
-    CONST = 121, MUTABLE = 122, ARRAY = 123, SIZEOF = 124, DIM = 125, Constant = 126, 
-    Whitespace = 127, Newline = 128, Integer = 129, Identifier = 130, RealNumber = 131, 
-    TimingLiteral = 132, StringLiteral = 133, LineComment = 134, BlockComment = 135
+    CONST = 121, MUTABLE = 122, ARRAY = 123, SIZEOF = 124, PRINT = 125, 
+    DIM = 126, Constant = 127, Whitespace = 128, Newline = 129, Integer = 130, 
+    Identifier = 131, RealNumber = 132, TimingLiteral = 133, StringLiteral = 134, 
+    LineComment = 135, BlockComment = 136
   };
 
   enum {
@@ -1663,6 +1664,7 @@ public:
     BuiltInMathContext *builtInMath();
     CastOperatorContext *castOperator();
     antlr4::tree::TerminalNode *SIZEOF();
+    antlr4::tree::TerminalNode *PRINT();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

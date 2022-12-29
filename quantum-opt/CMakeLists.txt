@@ -17,6 +17,7 @@ target_link_libraries(quantum-opt
         MLIRMemRefDialect
         MLIRArithDialect
         MLIRSCFDialect
+        MLIRVectorDialect
         MLIRIR
         MLIRParser
         MLIRPass

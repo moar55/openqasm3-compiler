@@ -1,5 +1,6 @@
 #include "../visitor.hpp"
 #include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/Vector/IR/VectorOps.h"
 #include "../utils/qasm_utils.hpp"
 
 
@@ -44,12 +45,7 @@ mlir::Type get_custom_opaque_type(const std::string& type,
 
 std::any visitor::visitQuantumMeasurement(
         qasmParser::QuantumMeasurementContext* context)  {
-  return {};
-}
-
-std::any visitor::visitQuantumMeasurementAssignment(
-        qasmParser::QuantumMeasurementAssignmentContext* context) {
-  auto indexed_identifier = context->quantumMeasurement()->indexedIdentifier();
+  auto indexed_identifier = context->indexedIdentifier();
   auto qubit_var_name = indexed_identifier->Identifier()->getText();
   auto qubit_ident = symbol_table.get_symbol(qubit_var_name);
   auto is_single_qubit = qubit_ident.getType().dyn_cast<mlir::OpaqueType>().getTypeData() == "Qubit";
@@ -85,7 +81,81 @@ std::any visitor::visitQuantumMeasurementAssignment(
     qubits_to_be_measured.push_back(symbol_table.get_symbol(qubit_var_name));
     allocation_size = 1;
   }
-  std::vector<Type> types(allocation_size, builder.getI1Type());
-  builder.create<quantum::MzOp>(builder.getUnknownLoc(), types, qubits_to_be_measured);
+
+  if (allocation_size == 1 || indexed) {
+    return builder.create<quantum::MzOp>(builder.getUnknownLoc(), builder.getI1Type(), qubits_to_be_measured.front()).getBitResult();
+  }
+
+  std::vector<Value> measurements;
+  auto temp_memref = builder.create<memref::AllocOp>(builder.getUnknownLoc(), MemRefType::get(allocation_size, builder.getI1Type()));
+  for (int i = 0; i < qubits_to_be_measured.size(); i++) {
+    auto qubit = qubits_to_be_measured[i];
+    measurements.push_back(builder.create<quantum::MzOp>(builder.getUnknownLoc(), builder.getI1Type(), qubit).getBitResult());
+    auto index_val = get_mlir_integer_val(builder, i, builder.getIndexType());
+    builder.create<memref::StoreOp>(builder.getUnknownLoc(), measurements[i], temp_memref, index_val);
+  }
+  auto output = builder.create<vector::LoadOp>(builder.getUnknownLoc(), VectorType::get(allocation_size, builder.getI1Type()), temp_memref,
+                                        get_mlir_integer_val(builder, 0, builder.getIndexType())).getResult();
+  builder.create<memref::DeallocOp>(builder.getUnknownLoc(), temp_memref);
+  return output;
+}
+
+std::any visitor::visitQuantumMeasurementAssignment(
+        qasmParser::QuantumMeasurementAssignmentContext* context) {
+  if (context->ARROW()) {
+    printErrorMessage("arrow based quantum measurement is not yet supported");
+  } else {
+    auto identifier_text = context->indexedIdentifier()->Identifier()->getText();
+    if (!symbol_table.get_symbol(identifier_text)) {
+      printErrorMessage("bit/bit array: " + identifier_text + ", is not declared!", context);
+    }
+    auto bit_arr = symbol_table.get_symbol(identifier_text);
+    bool is_single = bit_arr.getType().isInteger(1);
+    bool indexed = !context->indexedIdentifier()->indexOperator().empty();
+    if (is_single && indexed) {
+      printErrorMessage("cannot index a single bit!");
+    }
+
+    std::any visitOutput = this->visitQuantumMeasurement(context->quantumMeasurement());
+    Value measurement_val;
+    try {
+      measurement_val = std::any_cast<TypedValue<IntegerType>>(visitOutput);
+    } catch(...) {
+      measurement_val = std::any_cast<TypedValue<VectorType>>(visitOutput);
+    }
+
+    measurement_val.getType().dump();
+    //TODO: make sure width match
+    if (!is_single && !indexed && (!measurement_val.getType().isa<VectorType>()  || bit_arr.getType().dyn_cast<VectorType>().getShape() !=
+                      measurement_val.getType().dyn_cast<VectorType>().getShape())) {
+      printErrorMessage("quantum measurement qubits size must match the size of the bit array assigned to ", context);
+    }
+
+    if ((is_single || indexed) && !measurement_val.getType().isInteger(1)) {
+      printErrorMessage("cannot assign a measurement of mulitple qubits to a single bit");
+    }
+
+
+    if (!is_single) {
+      auto bit_arr_shape = bit_arr.getType().dyn_cast<VectorType>().getShape();
+      if (indexed) {
+        try {
+          auto index = std::stoi(context->indexedIdentifier()->indexOperator(0)->expression(0)->getText());
+          auto index_val = get_mlir_integer_val(builder, index, builder.getIndexType());
+          auto zero_index = get_mlir_integer_val(builder, 0, builder.getIndexType());
+          auto temp_memref = builder.create<memref::AllocOp>(builder.getUnknownLoc(),
+                                                             MemRefType::get(bit_arr_shape, builder.getI1Type()));
+          builder.create<vector::StoreOp>(builder.getUnknownLoc(), bit_arr, temp_memref, zero_index);
+          builder.create<memref::StoreOp>(builder.getUnknownLoc(), measurement_val, temp_memref, index_val);
+          measurement_val = builder.create<vector::LoadOp>(builder.getUnknownLoc(), VectorType::get(bit_arr_shape, builder.getI1Type()),
+                                                           temp_memref, zero_index); //change to an array
+          builder.create<memref::DeallocOp>(builder.getUnknownLoc(), temp_memref);
+        } catch (...) {
+          printErrorMessage("non int constant designator index is not yet supported");
+        }
+      }
+    }
+    symbol_table.add_symbol(identifier_text, measurement_val, true);
+  }
   return {};
 }

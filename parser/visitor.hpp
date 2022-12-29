@@ -319,9 +319,7 @@ public:
       return visitChildren(ctx);
     }
 
-    std::any visitBuiltInCall(qasmParser::BuiltInCallContext *ctx) override {
-      return visitChildren(ctx);
-    }
+    std::any visitBuiltInCall(qasmParser::BuiltInCallContext *ctx) override;
 
     std::any visitBuiltInMath(qasmParser::BuiltInMathContext *ctx) override {
       return visitChildren(ctx);

@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
                         (std::istreambuf_iterator<char>() ));
   auto context = std::make_unique<MLIRContext>();
   context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
-    scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
+    scf::SCFDialect, func::FuncDialect, vector::VectorDialect, restquantum::RestrictedQuantumDialect>();
   MLIRGenerator mlir_generator = MLIRGenerator(*context);
   mlir_generator.initialize_mlirgen("main");
   mlir_generator.mlirgen(qasm_src);
@@ -25,13 +25,14 @@ int main(int argc, char **argv) {
 //  pm.addPass(quantum::createConvertInstPass());
 //  pm.addPass(mlir::createCSEPass());
 //  pm.run(module);
+
   std::string s;
   llvm::raw_string_ostream os(s);
   module->print(os);
   os.flush();
   std::cout << s << std::endl;
 
-
+  std::cout << "hello" << "dude1" << std::endl;
 //
 //
   mlir::PassManager pm(module->getContext());
