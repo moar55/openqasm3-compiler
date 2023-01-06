@@ -1,0 +1,11 @@
+set(LLVM_TARGET_DEFINITIONS RestrictedQuantumOps.td)
+mlir_tablegen(RestrictedQuantumOps.h.inc -gen-op-decls)
+mlir_tablegen(RestrictedQuantumOps.cpp.inc -gen-op-defs)
+mlir_tablegen(RestrictedQuantumDialect.h.inc -gen-dialect-decls -dialect=restquantum)
+mlir_tablegen(RestrictedQuantumDialect.cpp.inc -gen-dialect-defs -dialect=restquantum)
+add_public_tablegen_target(MLIRRestrictedQuantumOpsIncGen)
+add_dependencies(mlir-headers MLIRRestrictedQuantumOpsIncGen)
+
+#add_mlir_dialect(RestrictedQuantumOps restquantum)
+add_mlir_doc(RestrictedQuantumDialect RestrictedQuantumDialect RestrictedQuantum/ -gen-dialect-doc)
+add_mlir_doc(RestrictedQuantumOps RestrictedQuantumOps RestrictedQuantum/ -gen-op-doc)

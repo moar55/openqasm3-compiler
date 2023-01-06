@@ -52,16 +52,15 @@ include(HandleLLVMOptions)
 
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
-include_directories(dialect/include)
-include_directories(${PROJECT_BINARY_DIR}/dialect/include)
+include_directories(include)
+include_directories(${PROJECT_BINARY_DIR}/include)
 link_directories(${LLVM_BUILD_LIBRARY_DIR})
 add_definitions(${LLVM_DEFINITIONS})
 link_libraries(antlr4_static)
 
-add_subdirectory(parser)
+add_subdirectory(include)
+add_subdirectory(lib)
 
-add_subdirectory(dialect/include)
-add_subdirectory(dialect/lib)
 #add_subdirectory(test)
 add_subdirectory(quantum-opt)
 

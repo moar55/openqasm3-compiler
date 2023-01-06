@@ -6,26 +6,40 @@ llvm_update_compile_flags(quantum-opt)
 target_include_directories(quantum-opt
         PRIVATE
         ${ANTLR4_INCLUDE_DIRS}
-        ../parser
-        ../dialect/lib
+        ../lib/parser
+        ../lib/quantum-mlir
 #        ../parser/generated
         )
 
+get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
+get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
+
 target_link_libraries(quantum-opt
         PRIVATE
+        ${dialect_libs}
+        ${conversion_libs}
         MLIRAnalysis
         MLIRMemRefDialect
-        MLIRArithDialect
-        MLIRSCFDialect
-        MLIRVectorDialect
         MLIRIR
+        MLIRLLVMCommonConversion
+        MLIRLLVMToLLVMIRTranslation
         MLIRParser
         MLIRPass
         MLIRRewrite
         MLIRFuncTransforms
         MLIRSideEffectInterfaces
         MLIRTransforms
-        hoba
+
+        MLIRCallInterfaces
+        MLIRCastInterfaces
+        MLIRExecutionEngine
+        MLIRLLVMCommonConversion
+        MLIRLLVMToLLVMIRTranslation
+        MLIRPass
+        MLIRSideEffectInterfaces
+        MLIRTargetLLVMIRExport
+
+        QUANTUM_MLIR
         generator
         )
 
