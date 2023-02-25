@@ -1,3 +1,4 @@
+#include <mlir/Conversion/FuncToLLVM/ConvertFuncToLLVMPass.h>
 #include "headers.h"
 
 using namespace mlir;
@@ -14,36 +15,45 @@ int main(int argc, char **argv) {
   mlir_generator.mlirgen(qasm_src);
   ModuleOp module = mlir_generator.get_module();
 //
+  module.dump();
+//  std::string
 
-
-  mlir::OpPrintingFlags flags;
-  flags.printValueUsers();
+//  mlir::OpPrintingFlags flags;
+//  flags.printValueUsers();
 //  flags.enableDebugInfo();
 //  flags.printGenericOpForm();
 // empty while loop doesn't work
-//  mlir::PassManager pm(module->getContext());
-//  pm.addPass(quantum::createConvertInstPass());
-//  pm.addPass(mlir::createCSEPass());
-//  pm.run(module);
-
-  std::string s;
-  llvm::raw_string_ostream os(s);
-  module->print(os);
-  os.flush();
-  std::cout << s << std::endl;
+  mlir::PassManager pm(module->getContext());
+  pm.addPass(mlir::createCanonicalizerPass());
+  pm.addPass(mlir::createCSEPass());
+  pm.addPass(mlir::createSymbolDCEPass());
+//  pm.addPass(quantum::createOptimizeQuantumPass());
+  //  pm.addPass(quantum::createConvertInstPass());
+  pm.run(module);
+  module.dump();
 
   //
 //
-  mlir::PassManager pm(module->getContext());
-  pm.addPass(quantum::createConvertInstPass());
-  pm.addPass(quantum::createForwardDeclareQuantumAllocsPass());
-  pm.addPass(mlir::createCSEPass());
-//  pm.addPass(createConvertFuncToLLVMPass());
-//  pm.addPass(createConvertVectorToLLVMPass());
-//  pm.addPass(createArithToLLVMConversionPass());
 
-//  pm.addPass(quantum::createLowerToLLVMPass());
-  pm.run(module);
+    pm.clear();
+    pm.addPass(quantum::createConvertToGenGatePass());
+    pm.addPass(quantum::createConvertInstPass());
+    pm.addPass(quantum::createQuantumSimulator());
+    pm.run(module);
+    module.dump();
+
+//  mlir::PassManager pm(module->getContext());
+//  pm.addPass(quantum::createConvertInstPass());
+//  pm.addPass(quantum::createForwardDeclareQuantumAllocsPass());
+//  pm.addPass(mlir::createCSEPass());
+//  pm.addPass(mlir::createConvertFuncToLLVMPass());
+//  pm.addPass(mlir::createConvertVectorToLLVMPass());
+//  pm.addPass(mlir::createArithToLLVMConversionPass());
+//  pm.addPass(mlir::createMemRefToLLVMConversionPass());
+//  pm.addPass(mlir::createReconcileUnrealizedCastsPass());
+
+//  pm.run(module);
+//  module.dump();
 
 //  LogicalResult::ver
 
@@ -51,7 +61,7 @@ int main(int argc, char **argv) {
 //  std::string s2;
 //  llvm::raw_string_ostream os2(s2);
 
-  module.dump();
+//  module.dump();
 //  module->print(os2, flags);
 //  os2.flush();
 //  std::cout << s2 << std::endl;
@@ -59,11 +69,10 @@ int main(int argc, char **argv) {
 
 
 //
-//  llvm::InitializeNativeTarget();
-//  llvm::InitializeNativeTargetAsmPrinter();
-//  registerLLVMDialectTranslation(*module->getContext());
 
 
+  //llvm::InitializeNativeTarget();
+  //llvm::InitializeNativeTargetAsmPrinter();
 //  registerLLVMDialectTranslation(*module->getContext());
 //  llvm::LLVMContext llvmContext;
 //  auto llvmModule = translateModuleToLLVMIR(module, llvmContext);
@@ -71,17 +80,27 @@ int main(int argc, char **argv) {
 //    llvm::errs() << "Failed to emit LLVM IR\n";
 //    return -1;
 //  }
-//  llvmModule->dump();
-//
-//
+
 //  ExecutionEngine::setupTargetTriple(llvmModule.get());
 
 //   run optimizaiton stuff
 //    ....
 //    ...
 
-  // Create an MLIR execution engine. The execution engine eagerly JIT-compiles
-  // the module.
+//  llvmModule->dump();
+
+
+/// JIT
+//  llvm::InitializeNativeTarget();
+//  llvm::InitializeNativeTargetAsmPrinter();
+//  registerLLVMDialectTranslation(*module->getContext());
+//
+//  //   run optimizaiton stuff
+////    ....
+////    ...
+//
+//  // Create an MLIR execution engine. The execution engine eagerly JIT-compiles
+//  // the module.
 //  mlir::ExecutionEngineOptions engineOptions;
 //  engineOptions.sharedLibPaths = {"/usr/local/lib/libmlir_c_runner_utils.so"};
 //  auto maybeEngine = mlir::ExecutionEngine::create(module, engineOptions);
@@ -94,5 +113,5 @@ int main(int argc, char **argv) {
 //    llvm::errs() << "JIT invocation failed\n";
 //    return -1;
 //  }
-
+  return 0;
 };

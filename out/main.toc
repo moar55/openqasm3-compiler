@@ -1,0 +1,10 @@
+\contentsline {chapter}{Acknowledgements}{vii}{section*.1}%
+\contentsline {chapter}{Abstract}{ix}{section*.3}%
+\contentsline {part}{\numberline {I}Introduction and Background Theory}{1}{part.1}%
+\contentsline {chapter}{\numberline {1}Introduction}{3}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Including code}{4}{section.1.1}%
+\contentsline {part}{\numberline {II}Body: What was done for the thesis}{5}{part.2}%
+\contentsline {part}{\numberline {III}Results and Conclusion}{7}{part.3}%
+\contentsline {part}{Appendix}{11}{part*.9}%
+\contentsline {chapter}{\numberline {A}Detailed Descriptions}{11}{appendix.A}%
+\contentsline {chapter}{Bibliography}{13}{appendix.A}%

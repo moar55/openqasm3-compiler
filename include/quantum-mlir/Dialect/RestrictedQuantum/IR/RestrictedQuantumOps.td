@@ -3,7 +3,6 @@
 
 include "RestrictedQuantumDialect.td"
 include "../../Quantum/IR/QuantumTypes.td"
-include "mlir/IR/PatternBase.td"
 
 def Rx90Op :  RestrictedQuantumOp<"rx90"> {
     let arguments = (ins QubitType:$qubit);
@@ -46,7 +45,6 @@ def IOp: RestrictedQuantumOp<"I"> {
  let results = (outs QubitType: $result);
 }
 
- def IdentityRewrite: Pat<(RzOp(RzOp)), (SqrtX)>;
 
 // U = Rz Ry(theta) Rz
 

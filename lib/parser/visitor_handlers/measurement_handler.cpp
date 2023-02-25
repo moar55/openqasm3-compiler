@@ -142,14 +142,15 @@ std::any visitor::visitQuantumMeasurementAssignment(
         try {
           auto index = std::stoi(context->indexedIdentifier()->indexOperator(0)->expression(0)->getText());
           auto index_val = get_mlir_integer_val(builder, index, builder.getIndexType());
-          auto zero_index = get_mlir_integer_val(builder, 0, builder.getIndexType());
-          auto temp_memref = builder.create<memref::AllocOp>(builder.getUnknownLoc(),
-                                                             MemRefType::get(bit_arr_shape, builder.getI1Type()));
-          builder.create<vector::StoreOp>(builder.getUnknownLoc(), bit_arr, temp_memref, zero_index);
-          builder.create<memref::StoreOp>(builder.getUnknownLoc(), measurement_val, temp_memref, index_val);
-          measurement_val = builder.create<vector::LoadOp>(builder.getUnknownLoc(), VectorType::get(bit_arr_shape, builder.getI1Type()),
-                                                           temp_memref, zero_index); //change to an array
-          builder.create<memref::DeallocOp>(builder.getUnknownLoc(), temp_memref);
+          measurement_val = builder.create<vector::InsertElementOp>(builder.getUnknownLoc(), measurement_val, bit_arr, index_val);
+//          auto temp_memref = builder.create<memref::AllocOp>(builder.getUnknownLoc(),
+//                                                             MemRefType::get(bit_arr_shape, builder.getI1Type()));
+//
+//          builder.create<vector::StoreOp>(builder.getUnknownLoc(), bit_arr, temp_memref, zero_index);
+//          builder.create<memref::StoreOp>(builder.getUnknownLoc(), measurement_val, temp_memref, index_val);
+//          measurement_val = builder.create<vector::LoadOp>(builder.getUnknownLoc(), VectorType::get(bit_arr_shape, builder.getI1Type()),
+//                                                           temp_memref, zero_index); //change to an array
+//          builder.create<memref::DeallocOp>(builder.getUnknownLoc(), temp_memref);
         } catch (...) {
           printErrorMessage("non int constant designator index is not yet supported");
         }

@@ -3,6 +3,13 @@
 
 include "mlir/Pass/PassBase.td"
 
+def ConvertToGenGate: Pass<"quantum-convert-to-gen-gate", "ModuleOp"> {
+    let summary = "Convert inst to gen gate";
+    let constructor = "mlir::quantum::createConvertToGenGatePass()";
+    let description = [{
+    }];
+}
+
 def ConvertInst: Pass<"quantum-convert-inst", "ModuleOp"> {
     let summary = "Convert inst to rest quantum insts";
     let constructor = "mlir::quantum::createConvertInstPass()";

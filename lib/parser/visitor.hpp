@@ -13,8 +13,15 @@ using namespace mlir;
 
 class visitor : public qasmBaseVisitor {
 public:
+    template <typename OpTy, typename... Args>
+    OpTy createOp(Args... args) {
+      OpTy value = builder.create<OpTy>(args...);
+      return value;
+    }
     // Return the symbol table.
     ScopedSymbolTable *getScopedSymbolTable() { return &symbol_table; }
+
+    int offset = 0;
 
     // The constructor, instantiates commonly used opaque types
      visitor(mlir::OpBuilder b, mlir::ModuleOp m, std::string &fname);

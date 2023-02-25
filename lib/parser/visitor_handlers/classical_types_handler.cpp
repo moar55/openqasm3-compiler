@@ -2,6 +2,8 @@
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 
+#include "mlir/Dialect/Vector/IR/VectorOps.h"
+
 using namespace mlir;
 std::any visitor::visitSingleDesignatorDeclaration(
         qasmParser::SingleDesignatorDeclarationContext* context) {
@@ -47,6 +49,18 @@ std::any visitor::visitSingleDesignatorDeclaration(
      val = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), init_attr); // default value
   }
   symbol_table.add_symbol(context->Identifier()->getText(), val);
+
+  auto total_size = 2;
+  auto size = total_size * 2 * 2;
+  ArrayRef<int64_t> shape {size};
+  std::vector<double> init(size);
+  std::fill(init.begin(), init.end(), 0.0);
+  init[0] = 1.0;
+  auto vector_type = VectorType::get(shape, builder.getF64Type());
+  auto attr = DenseFPElementsAttr::get(vector_type, init);
+  Value global_vector = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), attr, vector_type);
+  global_vector = builder.create<vector::ShapeCastOp>(builder.getUnknownLoc(), VectorType::get({total_size * 2, 2}, builder.getF64Type()), global_vector);
+
   return {};
 }
 

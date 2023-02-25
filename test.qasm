@@ -1,10 +1,4 @@
 OPENQASM 3.0;
-int [64] x = 12;
-qubit q0;
-x = x + 2;
-qubit q1;
-H q0;
-H q1;
-bit[2] c;
-c[0] = measure q0;
-c[1] = measure q1;
+qubit[2]q;
+X q[0];
+//TODO: change CX to iswap...etc

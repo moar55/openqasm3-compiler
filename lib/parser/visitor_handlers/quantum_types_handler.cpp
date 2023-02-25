@@ -3,11 +3,14 @@
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "expression_handler.h"
 
-
 using namespace mlir;
 
 std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext *context) {
   //TODO: disallow non const expressions for designator
+
+
+
+
   std::string var_name = context->Identifier()->getText();
   StringAttr str_attr = builder.getStringAttr(var_name);
   int64_t size = 1;
@@ -22,7 +25,9 @@ std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext 
   IntegerAttr integer_attr = IntegerAttr::get(integer_type, size);
 
   mlir::Value allocation = builder.create<mlir::quantum::QallocOp>(
-          builder.getUnknownLoc(), array_type, integer_attr, str_attr);
+          builder.getUnknownLoc(), array_type, integer_attr, str_attr, IntegerAttr::get(builder.getI32Type(), offset));
+
+  offset += size;
 
   if (size == 1) {
     auto pos = get_mlir_integer_val(builder, 0, builder.getI64Type());

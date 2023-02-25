@@ -1,4 +1,5 @@
 add_mlir_library(ConversionPasses
+        ConvertToGenGate.cpp
         LowerToRestQuantum.cpp
         LowerToLLVMIR.cpp
         QuantumSimulator.cpp

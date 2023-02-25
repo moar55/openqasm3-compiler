@@ -4,8 +4,7 @@
 #include <mlir/Dialect/Arith/IR/Arith.h>
 #include <quantum-mlir/Dialect/Quantum/IR/QuantumOps.h>
 #include "quantum-mlir/Dialect/RestrictedQuantum/IR/RestrictedQuantumOps.h"
-//#include "mlir/Pass/Pass.h"
-#include "quantum-mlir/Conversion//Passes.h"
+#include "quantum-mlir/Conversion/Passes.h"
 #include "PassImp.h"
 #include <cmath>
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -15,7 +14,7 @@
 using namespace mlir;
 
 template <typename Op, typename... Args>
-Value createRotationGateGeneric(ConversionPatternRewriter &rewriter, quantum::ValueSemanticsInstOp op,
+Value createRotationGateGeneric(ConversionPatternRewriter &rewriter, quantum::GenGate op,
                                 Location loc, bool replace, Args... args) {
   if (replace) {
     return rewriter.replaceOpWithNewOp<Op>(op, args...);
@@ -25,7 +24,7 @@ Value createRotationGateGeneric(ConversionPatternRewriter &rewriter, quantum::Va
 }
 
 Value createRotationGate(ConversionPatternRewriter &rewriter, Value operand, const std::pair<std::string,
-                         double>& my_pair, quantum::ValueSemanticsInstOp& op, Location loc, bool replace=false) {
+                         double>& my_pair, quantum::GenGate& op, Location loc, bool replace=false) {
   double angle = my_pair.second;
   Value output;
   if (my_pair.first == "rx") {
@@ -47,11 +46,11 @@ Value createRotationGate(ConversionPatternRewriter &rewriter, Value operand, con
   return output;
 }
 
-class ConvertInstRewrite : public OpConversionPattern<quantum::ValueSemanticsInstOp> {
+class ConvertInstRewrite : public OpConversionPattern<quantum::GenGate> {
 public :
     using OpConversionPattern::OpConversionPattern;
 
-    LogicalResult matchAndRewrite(quantum::ValueSemanticsInstOp op, OpAdaptor adaptor,
+    LogicalResult matchAndRewrite(quantum::GenGate op, OpAdaptor adaptor,
                                   ConversionPatternRewriter &rewriter) const override {
       //TODO: cleanup
       //TODO: maybe use enums for gate names
@@ -171,7 +170,7 @@ public:
       TypeConverter typeConverter;
       typeConverter.addConversion([](Type type) {return type;});
       RewritePatternSet patterns(context);
-      target.addIllegalOp<quantum::ValueSemanticsInstOp>();
+      target.addIllegalOp<quantum::GenGate>();
       patterns.add<ConvertInstRewrite>(typeConverter, context);
       if (failed(applyFullConversion(getOperation(), target,
                                         std::move(patterns)))) {

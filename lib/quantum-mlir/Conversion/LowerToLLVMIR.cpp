@@ -26,21 +26,22 @@ class LowerToLLVM
         : public quantum::LowerToLLVMBase<LowerToLLVM> {
 public:
     void runOnOperation() override {
-      LLVMConversionTarget target(getContext());
+      ConversionTarget target(getContext());
       target.addLegalOp<ModuleOp>();
+//      target.addLegalOp<vector::ShapeCastOp>();
 //      target.addLegalDialect<scf::SCFDialect, func::FuncDialect, arith::ArithDialect, vector::VectorDialect>();
       LLVMTypeConverter typeConverter(&getContext());
       RewritePatternSet patterns(&getContext());
-      populateSCFToControlFlowConversionPatterns(patterns);
-      mlir::arith::populateArithToLLVMConversionPatterns(typeConverter, patterns);
-      populateMemRefToLLVMConversionPatterns(typeConverter, patterns);
-      cf::populateControlFlowToLLVMConversionPatterns(typeConverter, patterns);
-      populateFuncToLLVMConversionPatterns(typeConverter, patterns);
-      populateVectorToLLVMConversionPatterns(typeConverter, patterns);
-
-      auto module = getOperation();
-      if (failed(applyFullConversion(module, target, std::move(patterns))))
-        signalPassFailure();
+//      populateSCFToControlFlowConversionPatterns(patterns);
+//      mlir::arith::populateArithToLLVMConversionPatterns(typeConverter, patterns);
+//      populateMemRefToLLVMConversionPatterns(typeConverter, patterns);
+//      cf::populateControlFlowToLLVMConversionPatterns(typeConverter, patterns);
+//      populateFuncToLLVMConversionPatterns(typeConverter, patterns);
+//      populateVectorToLLVMConversionPatterns(typeConverter, patterns);
+//
+//      auto module = getOperation();
+//      if (failed(applyPartialConversion(module, target, std::move(patterns))))
+//        signalPassFailure();
     };
 };
 
