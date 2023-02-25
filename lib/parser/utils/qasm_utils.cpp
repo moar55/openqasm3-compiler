@@ -335,7 +335,7 @@ mlir::Value get_or_extrct_qubit(ScopedSymbolTable &symbol_table, const std::stri
       printErrorMessage(("builder and qubit type can't be null when indexed name doesn't exist!"));
     }
     auto qubit_ident = symbol_table.get_symbol(qubit_var_name);
-    auto pos = get_mlir_integer_val(*builder, index, builder->getI32Type());
+    auto pos = get_mlir_integer_val(*builder, index, builder->getI64Type());
     auto qubit = builder->create<quantum::ExtractQubitOp>(builder->getUnknownLoc(), *qubit_type, qubit_ident, pos);
     symbol_table.add_symbol(indexed_name, qubit);
     return qubit;

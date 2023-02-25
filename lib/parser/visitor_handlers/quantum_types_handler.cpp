@@ -8,9 +8,6 @@ using namespace mlir;
 std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext *context) {
   //TODO: disallow non const expressions for designator
 
-
-
-
   std::string var_name = context->Identifier()->getText();
   StringAttr str_attr = builder.getStringAttr(var_name);
   int64_t size = 1;

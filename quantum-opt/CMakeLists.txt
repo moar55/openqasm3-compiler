@@ -20,6 +20,7 @@ target_link_libraries(quantum-opt
         ${conversion_libs}
         MLIRAnalysis
         MLIRMemRefDialect
+        MLIRMathDialect
         MLIRIR
         MLIRLLVMCommonConversion
         MLIRLLVMToLLVMIRTranslation
