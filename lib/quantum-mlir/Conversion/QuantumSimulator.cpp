@@ -19,6 +19,28 @@
 
 using namespace mlir;
 
+/*** Quantum Simulator Pass ***/
+//Note: qubits are read from right to left
+
+
+// helper function to compute output shape for reshaping
+// necessary for computing quantum gates
+ArrayRef<int64_t> compute_output_shape(ArrayRef<int64_t> in_shape, int64_t net_index) {
+    //dimensions
+    // First dimension
+    int64_t first_dim = pow(2, net_index);
+    // Second dimension
+    auto second_dim = 2;
+    // Third dimension
+    int64_t num_of_qubits = std::accumulate(in_shape.begin(), in_shape.end(), 1, std::multiplies<int64_t>()) / 4;
+    int64_t third_dim = pow(2, num_of_qubits - net_index  - 1);
+    // fourth dimension (the complex dimension)
+    int64_t fourth_dim = 2;
+
+    ArrayRef<int64_t> out_shape{first_dim, second_dim, third_dim, fourth_dim};
+    return out_shape;
+}
+
 //TODO: Add support for other gates
 //TODO: file can be heavily refactored, seperate diff gates in functions
 // Moreover, we can use mlir functions, but they can be costly
@@ -80,31 +102,10 @@ public:
 
         auto in_shape = vector.getType().dyn_cast<VectorType>().getShape();
 //        print input vector shape
-        std::cout << "input shape: " << std::endl;
-        for (auto &el: in_shape) {
-            std::cout << el << " ";
-        }
-        std::cout << std::endl;
 //        auto two_as_val = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getI64Type(), 2));
 
-        //dimensions
-        // First dimension
-        int64_t first_dim = pow(2, net_index);
-        // Second dimension
-        auto second_dim = 2;
-        // Third dimension
-        int64_t num_of_qubits = std::accumulate(in_shape.begin(), in_shape.end(), 1, std::multiplies<int64_t>()) / 4;
-        int64_t third_dim = pow(2, num_of_qubits - net_index  - 1);
-        // fourth dimension (the complex dimension)
-        int64_t fourth_dim = 2;
-
-        ArrayRef<int64_t> out_shape{first_dim, second_dim, third_dim, fourth_dim};
+        ArrayRef<int64_t> out_shape = compute_output_shape(in_shape, net_index);
         // print output vector shape
-        std::cout << "output shape: " << std::endl;
-        for (auto &el: out_shape) {
-            std::cout << el << " ";
-        }
-        std::cout << std::endl;
 
         auto vector_type = VectorType::get(out_shape,rewriter.getF64Type());
         Value new_vec =  rewriter.replaceOpWithNewOp<vector::ShapeCastOp>(op, vector_type, vector);
@@ -204,18 +205,7 @@ public:
         std::cout << std::endl;
 //        auto two_as_val = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getI64Type(), 2));
 
-        //dimensions
-        // First dimension
-        int64_t first_dim = pow(2, net_index);
-        // Second dimension
-        auto second_dim = 2;
-        // Third dimension
-        int64_t num_of_qubits = std::accumulate(in_shape.begin(), in_shape.end(), 1, std::multiplies<int64_t>()) / 4;
-        int64_t third_dim = pow(2, num_of_qubits - net_index  - 1);
-        // fourth dimension (the complex dimension)
-        int64_t fourth_dim = 2;
-
-        ArrayRef<int64_t> out_shape{first_dim, second_dim, third_dim, fourth_dim};
+        ArrayRef<int64_t> out_shape = compute_output_shape(in_shape, net_index);
         // print output vector shape
         std::cout << "output shape: " << std::endl;
         for (auto &el: out_shape) {
