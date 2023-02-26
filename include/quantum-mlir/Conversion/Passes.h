@@ -10,6 +10,7 @@ namespace mlir {
         std::unique_ptr<OperationPass<ModuleOp>> createForwardDeclareQuantumAllocsPass();
         std::unique_ptr<OperationPass<ModuleOp>> createQuantumSimulator();
         std::unique_ptr<OperationPass<ModuleOp>> createLowerToLLVMPass();
+
         [[maybe_unused]] void registerQuantumPasses();
     }
 }

@@ -23,6 +23,8 @@ Value createRotationGateGeneric(ConversionPatternRewriter &rewriter, quantum::Ge
   }
 }
 
+
+
 Value createRotationGate(ConversionPatternRewriter &rewriter, Value operand, const std::pair<std::string,
                          double>& my_pair, quantum::GenGate& op, Location loc, bool replace=false) {
   double angle = my_pair.second;
@@ -39,7 +41,8 @@ Value createRotationGate(ConversionPatternRewriter &rewriter, Value operand, con
       output = createRotationGateGeneric<restquantum::Ry180Op>(rewriter, op, loc, replace, operand.getType(), operand);
   } else if (my_pair.first == "rz") {
     FloatType f64 = rewriter.getF64Type();
-    FloatAttr angle_attr = FloatAttr::get(f64, angle);
+    auto radians_angle = angle * M_PI / 180;
+    FloatAttr angle_attr = FloatAttr::get(f64, radians_angle);
     Value angle_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), angle_attr, f64).getResult();
     output = createRotationGateGeneric<restquantum::RzOp>(rewriter, op, loc, replace, operand.getType(), operand, angle_op);
   }

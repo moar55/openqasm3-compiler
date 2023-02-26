@@ -1,4 +1,5 @@
 #include <mlir/Conversion/FuncToLLVM/ConvertFuncToLLVMPass.h>
+#include "mlir/Conversion/ComplexToLLVM/ComplexToLLVM.h"
 #include "headers.h"
 
 using namespace mlir;
@@ -44,6 +45,7 @@ int main(int argc, char **argv) {
     auto context = std::make_unique<MLIRContext>();
     context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
         math::MathDialect,
+        complex::ComplexDialect,
         scf::SCFDialect, func::FuncDialect, vector::VectorDialect,LLVM::LLVMDialect, restquantum::RestrictedQuantumDialect>();
     MLIRGenerator mlir_generator = MLIRGenerator(*context);
     mlir_generator.initialize_mlirgen("main");
@@ -75,10 +77,14 @@ int main(int argc, char **argv) {
     module.dump();
 
     pm.clear();
+    //convert complex to llvm
     pm.addPass(mlir::createConvertFuncToLLVMPass());
     pm.addPass(mlir::createConvertVectorToLLVMPass());
     pm.addPass(mlir::createArithToLLVMConversionPass());
     pm.addPass(mlir::createMemRefToLLVMConversionPass());
+    pm.addPass(mlir::createConvertComplexToLLVMPass());
+//    createConvertComplexToLLVMPass());
+//    pm.addPass(quantum::createLowerToLLVMPass());
     pm.addPass(mlir::createReconcileUnrealizedCastsPass());
     pm.run(module);
 
