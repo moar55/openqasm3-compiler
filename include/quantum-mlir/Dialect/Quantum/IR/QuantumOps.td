@@ -24,6 +24,11 @@ def MzOp: QuantumOp<"mz"> {
     let results = (outs I1: $bit_result);
 }
 
+def PrintGlobalVectorOp : QuantumOp<"print_global_vector", []> {
+    let arguments = (ins);
+    let results = (outs);
+}
+
 def GenGate : QuantumOp<"gen_gate", [AttrSizedOperandSegments]> {
     let arguments = (ins StrAttr:$name, Variadic<QubitType>:$qubits, Variadic<F64>:$params);
     let results = (outs Variadic<AnyTypeOf<[ResultType, QubitType]>>:$result);

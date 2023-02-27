@@ -151,11 +151,13 @@ public:
       target.addLegalOp<ModuleOp>();
       target.addLegalDialect<
               memref::MemRefDialect,arith::ArithDialect,restquantum::RestrictedQuantumDialect, vector::VectorDialect, func::FuncDialect, scf::SCFDialect>();
-      target.addLegalOp<quantum::MzOp, quantum::GenGate, quantum::QallocOp, quantum::ExtractQubitOp>();
+      target.addLegalOp<quantum::MzOp, quantum::GenGate, quantum::QallocOp, quantum::ExtractQubitOp, quantum::PrintGlobalVectorOp>();
       TypeConverter typeConverter;
       typeConverter.addConversion([](Type type) {return type;});
       RewritePatternSet patterns(context);
-      patterns.add<ConvertXRewrite, ConvertYRewrite, ConvertZRewrite, ConvertIRewrite, ConvertSRewrite, ConvertTRewrite, ConvertRXRewrite, ConvertRYRewrite, ConvertRZRewrite, ConvertCXRewrite>(typeConverter, context);
+      patterns.add<ConvertXRewrite, ConvertYRewrite, ConvertZRewrite, ConvertIRewrite, ConvertSRewrite, ConvertTRewrite, ConvertRXRewrite, ConvertRYRewrite, ConvertRZRewrite,
+      ConvertHRewrite,
+      ConvertCXRewrite>(typeConverter, context);
       if (failed(applyFullConversion(getOperation(), target,
                                      std::move(patterns)))) {
         return signalPassFailure();

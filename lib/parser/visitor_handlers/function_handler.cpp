@@ -9,8 +9,10 @@ std::any visitor::visitBuiltInCall(qasmParser::BuiltInCallContext *ctx) {
     generator.visitExpression(expr);
     auto val = generator.current_value;
     builder.create<vector::PrintOp>(builder.getUnknownLoc(), val);
+  } else if (ctx->GLOB_VEC_PRINT()){
+      builder.create<quantum::PrintGlobalVectorOp>(builder.getUnknownLoc());
   } else {
-    printErrorMessage("only print builtincall is currently supported");
+    printErrorMessage("We do not currently support this built in call: " + ctx->getText(), ctx);
   }
   return {};
 }

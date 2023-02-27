@@ -34,9 +34,9 @@ public:
     COMMA = 109, EQUALS = 110, ARROW = 111, PLUS = 112, MINUS = 113, MUL = 114, 
     DIV = 115, MOD = 116, IMAG = 117, ImagNumber = 118, COMPLEX = 119, HASH = 120, 
     CONST = 121, MUTABLE = 122, ARRAY = 123, SIZEOF = 124, PRINT = 125, 
-    DIM = 126, Constant = 127, Whitespace = 128, Newline = 129, Integer = 130, 
-    Identifier = 131, RealNumber = 132, TimingLiteral = 133, StringLiteral = 134, 
-    LineComment = 135, BlockComment = 136
+    GLOB_VEC_PRINT = 126, DIM = 127, Constant = 128, Whitespace = 129, Newline = 130, 
+    Integer = 131, Identifier = 132, RealNumber = 133, TimingLiteral = 134, 
+    StringLiteral = 135, LineComment = 136, BlockComment = 137
   };
 
   explicit qasmLexer(antlr4::CharStream *input);

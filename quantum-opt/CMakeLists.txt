@@ -20,6 +20,8 @@ target_link_libraries(quantum-opt
         ${conversion_libs}
         MLIRAnalysis
         MLIRMemRefDialect
+        MLIRLinalgDialect
+        MLIRTensorDialect
         MLIRComplexDialect
         MLIRMathDialect
         MLIRIR

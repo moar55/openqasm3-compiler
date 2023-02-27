@@ -115,9 +115,21 @@ std::any qasm_expression_generator::visitMultiplicativeExpression(qasmParser::Mu
       auto rhs = current_value;
       Value val;
       if (internal_value_type.isa<IntegerType>() || internal_value_type.isa<VectorType>()) { //TODO: handle when vector is not an integer vector
-        val = createOp<arith::MulIOp>(location, lhs, rhs);
+          if (ctx->DIV()) {
+            val = createOp<arith::DivSIOp>(location, lhs, rhs);
+          } else if (ctx->MUL()) {
+            val = createOp<arith::MulIOp>(location, lhs, rhs);
+          } else if (ctx->MOD()) {
+            val = createOp<arith::RemSIOp>(location, lhs, rhs);
+          }
       } else if (internal_value_type.isa<FloatType>()){
-        val = createOp<arith::MulFOp>(location, lhs, rhs);
+          if (ctx->DIV()) {
+            val = createOp<arith::DivFOp>(location, lhs, rhs);
+        } else if (ctx->MUL()) {
+            val = createOp<arith::MulFOp>(location, lhs, rhs);
+        } else if (ctx->MOD()) {
+            val = createOp<arith::RemFOp>(location, lhs, rhs);
+        }
       } else {
         printErrorMessage("Assigning to an identifier of this type is not supported yet!");
       }

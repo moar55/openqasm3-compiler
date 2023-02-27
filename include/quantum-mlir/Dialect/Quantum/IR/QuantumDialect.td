@@ -33,7 +33,7 @@ class SingleSimpleGate<string mnemonic> : QuantumOp<mnemonic> {
 }
 
 
-class RotationGate<string mnemonic> : QuantumOp<mnemonic, [NoMemoryEffect]> {
+class RotationGate<string mnemonic> : QuantumOp<mnemonic> {
     let arguments = (ins QubitType:$qubit, F64:$angle);
     let results = (outs QubitType:$result);
 }

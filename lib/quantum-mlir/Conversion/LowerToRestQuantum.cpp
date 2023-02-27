@@ -62,7 +62,7 @@ public :
       auto params = op.getParams();
 
       if (gate_name == "H") {
-        rotation_gates_and_angles = {std::pair{"ry", 90}, std::pair{"rx", 180}}; //Ry(90)Rx(180)
+        rotation_gates_and_angles = {std::pair{"rx", 180}, std::pair{"ry", 90}}; //Ry(90)Rx(180)
       } else if (gate_name == "X") {
         rotation_gates_and_angles = {std::pair{"rx", 180}}; // Rx(180)
       } else if (gate_name == "Z") {

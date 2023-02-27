@@ -446,7 +446,7 @@ booleanLiteral
     ;
 
 builtInCall
-    : ( builtInMath | castOperator | SIZEOF | PRINT) LPAREN expressionList RPAREN
+    : ( builtInMath | castOperator | SIZEOF | PRINT | GLOB_VEC_PRINT) LPAREN expressionList? RPAREN
     ;
 
 builtInMath
@@ -642,6 +642,7 @@ MUTABLE: 'mutable';
 ARRAY: 'array';
 SIZEOF: 'sizeof';
 PRINT: 'print';
+GLOB_VEC_PRINT: 'PRINT_GLOBAL_VECTOR';
 DIM: '#dim';
 
 Constant : ( 'pi' | 'π' | 'tau' | '𝜏' | 'euler' | 'ℇ' );

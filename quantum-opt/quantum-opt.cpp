@@ -1,5 +1,7 @@
 #include <mlir/Conversion/FuncToLLVM/ConvertFuncToLLVMPass.h>
 #include "mlir/Conversion/ComplexToLLVM/ComplexToLLVM.h"
+#include "mlir/Conversion/TensorToLinalg/TensorToLinalgPass.h"
+#include "mlir/Conversion/LinalgToLLVM/LinalgToLLVM.h"
 #include "headers.h"
 
 using namespace mlir;
@@ -46,7 +48,7 @@ int main(int argc, char **argv) {
     context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
         math::MathDialect,
         complex::ComplexDialect,
-        scf::SCFDialect, func::FuncDialect, vector::VectorDialect,LLVM::LLVMDialect, restquantum::RestrictedQuantumDialect>();
+        tensor::TensorDialect, linalg::LinalgDialect, scf::SCFDialect, func::FuncDialect, vector::VectorDialect,LLVM::LLVMDialect, restquantum::RestrictedQuantumDialect>();
     MLIRGenerator mlir_generator = MLIRGenerator(*context);
     mlir_generator.initialize_mlirgen("main");
     mlir_generator.mlirgen(qasm_src);
@@ -70,6 +72,10 @@ int main(int argc, char **argv) {
     pm.clear();
     pm.addPass(quantum::createConvertToGenGatePass());
     pm.addPass(quantum::createConvertInstPass());
+    pm.run(module);
+    module.dump();
+
+    pm.clear();
     pm.addPass(quantum::createQuantumSimulator());
     pm.addPass(mlir::createCSEPass());
     pm.addPass(mlir::createSymbolDCEPass());
@@ -82,12 +88,13 @@ int main(int argc, char **argv) {
     pm.addPass(mlir::createConvertVectorToLLVMPass());
     pm.addPass(mlir::createArithToLLVMConversionPass());
     pm.addPass(mlir::createMemRefToLLVMConversionPass());
+    pm.addPass(mlir::createConvertTensorToLinalgPass());
+    pm.addPass(mlir::createConvertLinalgToLLVMPass());
     pm.addPass(mlir::createConvertComplexToLLVMPass());
 //    createConvertComplexToLLVMPass());
 //    pm.addPass(quantum::createLowerToLLVMPass());
     pm.addPass(mlir::createReconcileUnrealizedCastsPass());
     pm.run(module);
-
 
     /// JIT
     llvm::InitializeNativeTarget();
