@@ -4,6 +4,8 @@
 #include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 
+#include "mlir/Dialect/Vector/IR/VectorOps.h"
+
 #include "expression_handler.h"
 #include "mlir/IR/BuiltinAttributes.h"
 
@@ -25,6 +27,7 @@ std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext 
   //TODO: refactor in a function?
   auto context = std::make_unique<MLIRContext>();
   context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
+            vector::VectorDialect,
             scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
   OpBuilder shadow_builder(context.get());
   std::set<std::string> yield_symbols;

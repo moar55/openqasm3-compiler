@@ -1,6 +1,66 @@
 % !TEX root = ../main.tex
 \chapter{Introduction}
 \label{chapter:Introduction}
+Combination of quantum and classical computation as a form of Hetorgenous Computing allows us
+to solve very interesting problems. Many quantum algorithms and applications relies
+deeply on this combination. Whether near-time heterogenous computing (i.e: Variational Quantum Eigen Solver),
+or real-time (i.e: quantum error correction algorithms). While near-time heterogenous computing
+is already achievable with current technology, albeit on a small scale, 
+real-time heterogenous computing is still a
+challenge,
+%TODO: fact check
+due to the issue of decoherence time of quantum systems, and the requirement for
+very low classical data transfer latency to account for this issue. In either
+of these cases, we can use a quantum processing unit (QPU) as an accelerator
+alongside a cpu, where the QPU can solve problems that QPU's excel in and the
+CPU can solve problems that CPU's excel in, such as conditionals, loops...etc.
+This allows us to apply quantum algorithms that uses a cpu as a co-processor,
+but also to improve the performance of a a QPU as in the case of quantum error
+correction.  This concept of heterogenousity can also be extended to include
+other types of accelerators such as GPUs, FPGAs, and ASICs, to benefit from them
+in domains where they excel. However, in this thesis we will focus on the
+combination of quantum and classical computing. In this thesis we provide a compilation 
+framework for OPENQASM 3.0, a quantum programming language that supports many classical instructions,
+allowing for heterogenous computing. Previous workflows have been provided by this,
+notably the QCOR framework, which was a great inspiration for this work. QCOR, and after that this work,
+created dialects for lowering of OPENQASM 3.0 to MLIR, apply optimizations and then
+execute this intermeidate representation on a QPU paired with a classical accelarator, or just execute it 
+on a quantum simulator.
+%maybe cite qcor?
+In this work we approach this problem similarly, in a couple of aspects, moreover,
+we noticed that the work on QCOR was discountinued, and the OPENQASM 3.0 spec was changing
+frequently, and we wanted to keep up with the latest changes. 
+% TODO: double check if we actually abide to the latest syntax,
+% if not just mention that we tried to adhere to the latest available spec.
+The difference in our approach are the following:
+1- adhere to latest spec as of time of development
+2- use latest MLIR version
+3- make use of dialects such as the vector dialect, to allow for vectorization of 
+operations and perform the much needed speed up of classical operations.
+4- Provide an explicit lowering step to restricted gate sate matching quantum gates
+available on desired hardware.
+5- We did this step as a proof of concept of the possibility to lower a generic quantum dialect
+to a restricted quantum dialect that has a specific set of quantum gates. We used quantum gates
+supported by the Walter Meiner Institute(WMI)'s quantum computers, as an example.
+6- Due to limitations faced by the quantum computing team in WMI, we were not able to execute
+the quantum heterogenous generated MLIR code on their hardware.
+However, as also another proof of conept, we created a quantum simulator written purely in MLIR
+to test out our compilation pipeline, and to showcase the possiblity to write a quantum simulator purely in MLIR,
+which could have superior perfromance to call external c++(or other languages) from within our MLIR code.
+
+In the next section we provide a background about the differente topics for this thesis. 
+FOllowed by the body were we showcase our approach to this
+compilation pipeline, the key components in our codebase, the openqasm operation we 
+supported, not all operations were supported but the set of operations can be extended. We also showcase
+some example mlir code that was generated at 
+different stages of our compilation pipeline.
+Finally we show some basic quantum optimization that
+we constructed using MLIR's pattern rewriter as part of the compilation passes,
+as well as builtin mlir classical optimizations.
+Finally, in the last chapeter we showcase our quantum
+simulation and present some closing remarks about our works
+and the future work that can extend the current one.
+
 % This document has been created in order to show you some of the capabilities 
 % of \LaTeX.  A great resource for an introduction to \LaTeX\xspace is Tobias
 % Oetiker's ''The Not So Short Introduction to \LaTeXe'' \cite{latex}.  Please

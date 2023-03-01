@@ -2,6 +2,8 @@
 #include "mlir/Conversion/ComplexToLLVM/ComplexToLLVM.h"
 #include "mlir/Conversion/TensorToLinalg/TensorToLinalgPass.h"
 #include "mlir/Conversion/LinalgToLLVM/LinalgToLLVM.h"
+#include "mlir/Conversion/SCFToControlFlow/SCFToControlFlow.h"
+#include "mlir/Conversion/ControlFlowToLLVM/ControlFlowToLLVM.h"
 #include "headers.h"
 
 using namespace mlir;
@@ -88,9 +90,12 @@ int main(int argc, char **argv) {
     pm.addPass(mlir::createConvertVectorToLLVMPass());
     pm.addPass(mlir::createArithToLLVMConversionPass());
     pm.addPass(mlir::createMemRefToLLVMConversionPass());
-    pm.addPass(mlir::createConvertTensorToLinalgPass());
-    pm.addPass(mlir::createConvertLinalgToLLVMPass());
+//    pm.addPass(mlir::createConvertTensorToLinalgPass());
+//    pm.addPass(mlir::createConvertLinalgToLLVMPass());
     pm.addPass(mlir::createConvertComplexToLLVMPass());
+    pm.addPass(mlir::createConvertSCFToCFPass());
+    pm.addPass(mlir::cf::createConvertControlFlowToLLVMPass());
+//    pm.addPass(mlir::createc)
 //    createConvertComplexToLLVMPass());
 //    pm.addPass(quantum::createLowerToLLVMPass());
     pm.addPass(mlir::createReconcileUnrealizedCastsPass());

@@ -2,6 +2,7 @@
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "../generated/qasmLexer.h"
 #include <quantum-mlir/Dialect/RestrictedQuantum/IR/RestrictedQuantumDialect.h>
+#include "mlir/Dialect/Vector/IR/VectorOps.h"
 
 using namespace mlir;
 
@@ -60,6 +61,7 @@ std::any visitor::visitLoopStatement(qasmParser::LoopStatementContext *ctx) {
     //TODO: refactor in a function?
     auto context = std::make_unique<MLIRContext>();
     context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
+            vector::VectorDialect,
             scf::SCFDialect, func::FuncDialect, restquantum::RestrictedQuantumDialect>();
     OpBuilder shadow_builder(context.get());
     std::set<std::string> yield_symbols;
