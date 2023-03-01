@@ -1,0 +1,45 @@
+% !TEX root = ../main.tex
+% Included by MAIN.TEX
+% Put your content in here or include it by using \input (\include won't work)
+
+\addtolength{\evensidemargin}{-12mm}
+
+% ---------------------------------------------------------------------------
+%
+%Introduction and Background Theory
+%
+% ---------------------------------------------------------------------------
+\part[Introduction]{Introduction}
+\label{part:introudction}
+\input{chapters/Introduction}
+\input{chapters/Background}
+
+%% ---------------------------------------------------------------------------
+%%
+%% Thesis content: What did you do?
+%%
+%%% ---------------------------------------------------------------------------
+\part[Body]{Body}
+\label{part:body}
+\input{chapters/Body}
+
+%% ---------------------------------------------------------------------------
+%%
+%% Results and Conclusion
+%%
+%% ---------------------------------------------------------------------------
+\part[Simulation and Conclusion]{Simulation and Conclusion}
+\label{part:simulationsAndConclusion}
+\input{chapters/Conclusion}
+
+% ---------------------------------------------------------------------------
+%
+% Appendix
+%
+% ---------------------------------------------------------------------------
+\part*{Appendix}
+\addcontentsline{toc}{part}{Appendix}
+
+\appendix %---------------------------------------
+
+\input{chapters/Appendix}

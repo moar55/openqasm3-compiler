@@ -1,0 +1,134 @@
+\chapter{Background}
+\label{chapter:Background}
+\section{Heterogenous Computing}
+Heterogeneous computing refers to the use of multiple types of processing units
+or cores within a single computer system. These processing units can include
+CPUs, GPUs, FPGAs, and other specialized processors, each of which can perform
+specific types of computations with varying degrees of efficiency. The goal of
+heterogeneous computing is to leverage the strengths of each processing unit to
+improve the overall performance and energy efficiency of the system. For our
+purposes we will focus on hetorgenous computing that combines classical
+computing using CPUs and Quantum Computing using QPUs, quantum-classical
+heterogenous computing.
+In this kind of heterogenous computing we face the challenge of quantum
+decoherence. Quantum decohrence is the phenomenon where quantum system interact
+with the environment, causing the quantum particles (qubits) to lose their
+quantum behaviour and fallback to a classical one.
+These two challenges are differnet depending on whether we are applying
+near-time or real-time quantum computing. Real-time requires calculation to
+complete with qubit coherence, while near-timq quantum computing tolerates high
+lateny % paraphrase
+\section{Quantum Computing Programming}
+Quantum computing programming languages are designed to help developers write
+and execute quantum algorithms on quantum computers. Although quantum computers
+are still in the early stages of development, there has been significant
+progress in the development of quantum computing programming languages. In this
+thesis we are only interested in OPENQASM 3.0. OPENQASM - short for Open Quantum
+Assembly - is a low level, quantum circuit-like language for quantum computing.
+With it's newest edition - OPENQASM 3.0 -, OPENQASM is no longer a strictly
+quantum programming language, but rather a Heterogenous language. It allows for
+strictly quantum operations provided in OPENQASM 2.0, but also allows classical
+operations such as control operations (i.e: for and while loops, if
+statements...etc), extensive arithmetic operations, among many other operations.
+This heterogenousity of the language, being an open standard, and the large
+adoption by many scientists are all reasons for focusing on OPNEQASM 3.0 in this
+thesis.
+\section{Compilation}
+\subsection{Compilation Overview}
+Compilation in computer science is the process of translating a source language
+to a target language. Typically this is done in an effort to translate a
+high-level language, to a lower level lanaguage, or to machine to be executed by
+the computer. Typically a compiler has two parts, the frontend and the backend.
+The frontend applies the analysis phase of a compiler, while the backend applies
+the synthesis phase. The analysis phase, among possibly other steps, has three
+main steps:
+\begin{itemize}
+  \item Lexical Analysis
+  \item Syntax Analysis
+  \item Semantic Analysis
+\end{itemize}
+Lexical analysis, also called tokenization, is the process of splitting the
+input file into multiple tokens. If invalid tokens are found a tokenization
+error is generated. Syntax analysis, also known as parsing, is the process of
+verifying that a token stream is syntatically well-formed, and constructs a
+syntax tree from a valid. This essentially verifies that the input program
+abides to our language's grammar syntax, and provides an intermeidate
+reprsentation for the next stage of analysis. The program that performs the
+parsing is called the parser. Finally, semantic analysis is the process of
+veryfing that our program is sound in regard to our language's semantics. For
+example, in a strictly typed language an int variable can't be assigned a
+string. During semantic analysis, the syntax tree can be annotated to provide
+useful information (i.e: implicit type casting information) and produces what is
+known as an abstract syntax tree.
+
+The next stage, the synthesis phase, consists also of three main phases:
+\begin{itemize}
+  \item Intermediate Code Generation
+  \item Code Optimization
+  \item Target Code Generation
+\end{itemize}
+Intermediate code generation is the process of generating a low-level
+intermediate representation (IR) code. This IR usually has the benefit of having
+a few instruction set, simple syntax and semantics. This makes the next stage
+much simple, the code optimization stage. Code optimization or program
+optimization is a big field that uses mathematical concepts from other fields
+such as lattice theory to analyse the code and apply any possible
+transformations observed from the analysis, that improves the size or runtime of
+the program. Finally, target code generation is the process of generating the
+target code to execute on the machine. %TODO: makes this more concise
+\subsection{ANTLR}
+ANTLR (Aother Tool for Language Recognition) is a parser generator that can
+read, analyze, execute, or translate structured text or binary files. It's often
+used in the creation of programming languages, tools, and frameworks
+\cite{ANTLR}. ANTLR generates a parser from a grammar defined in a domain
+specific language (DSL), desgined by ANTLR. ANTLR provides runtimes in multiple
+programming languages. You can choose which runtime you want your parser to be
+written in, and then you can construct and walk parse trees from input programs.
+\subsection{LLVM and MLIR}
+\subsubsection{LLVM}
+LLVM, which stands for Low Level Virtual Machine, is a compiler framework that
+enables comprehensive program analysis and transformation for various programs
+throughout their entire lifespan. It does this by providing high-level
+information to compiler transformations at compile-time, link-time, run-time,
+and in idle time between runs. LLVM uses a common, low-level code representation
+in Static Single Assignment (SSA) form, which includes a simple,
+language-independent type-system that exposes the primitives commonly used to
+implement high-level language features. Additionally, LLVM features an
+instruction for typed address arithmetic and a simple mechanism that can be used
+to implement the exception handling features of high-level languages and
+\texttt{setjmp}/\texttt{longjmp} in C uniformly and efficiently.
+\subsection{MLIR}
+Multi-Level Intermediate Representation (MLIR) is a novel approach for creating
+reusable and adaptable domain specific compilers. It is designed to provide an
+extensible common IR of SSA form, that can be used to represent multiple Domain
+Specific Languages (DSL)s. This eleviates the need for a new IR for each new DSL
+language, and allows for the reuse of existing IRs, especially within the same
+domain. Moreover, MLIR can be then lowered to LLVM IR, and utilize the LLVM
+toolchain providing multiple lower-level optimizations and the ability to target
+different kinds of hardware accelerators with different architectures. The
+structure of MLIR's IR has few key abstractions - types, attributes, and
+operations. These main three abstractions can sufficiently extend the IR to its
+users needs. There are two more abstractions, regions and blocks, but they are
+extension of operations, where a block is a list of operations, and a region is
+a list of blocks. A Dialect refers to a unique namespace that encompasses a
+coherent set of operations, types, and attributes that are logically grouped
+together. MLIR provides a lot of public dialects catering to different domains,
+such as the Arith Dialect, the Math Dialect, the MemRef (Memory Reference) Dialect,
+and the Vector Dialect...etc. One can also create their own dialect 
+for their own domain specific application. MLIR also provides a set of tools to
+help with the creation of new dialects, such as the MLIR TableGen tool, which
+allows for the creation of new dialects by writing a simple DSL.
+However, it should be noted that if you desire lowering down to LLVM IR, you 
+will have to lower your dialect's operations in terms of the dialects provided 
+by MLIR (include the LLVM IR). There are multiple approaches and defined classes that can aid with that.
+\subsection{Efforts to Leverage MLIR for Heterogenous Quantum Computing}
+Similar work to the one in this thesis wsa done by a team at Oak Ridge National Laboratory.
+QCOR, a tool created by this team, is a language extension for creating quantum kernels (in C++ and python),
+and a compiler platform for heterogenous computing.
+%TODO: maybe cite their paper?
+To cater for other publicly available quantum DSL's, mainly OPENQASM 2.0 and OPENQASM 3.0, they created an 
+MLIR dialect, Quantum Dialect, that allows for representation of the quantum operations in MLIR.
+They also used MLIR's pattern rewriter to perform optimizations on the quantum IR.
+Finally they lowered it to LLVM IR in a specific format that can be executed by their own runtime, 
+that can target different quantum simulators and quantum hardware, alongside classical hardware.
+It is no surprise that the work done by them was a great inspiration for this thesis.
