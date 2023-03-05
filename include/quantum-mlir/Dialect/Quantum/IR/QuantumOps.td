@@ -49,11 +49,10 @@ def RxOp : RotationGate<"RxOp">;
 def RyOp : RotationGate<"RyOp">;
 def RzOp : RotationGate<"RzOp">;
 
-def CXOp : QuantumOp<"CX", [NoMemoryEffect]> {
+def CXOp : QuantumOp<"cx", [NoMemoryEffect]> {
     let arguments = (ins QubitType: $qubit1, QubitType: $qubit2);
     let results = (outs QubitType: $control, QubitType: $sink);
 }
-
 
 
 def DeallocOp : QuantumOp<"dealloc", []> {

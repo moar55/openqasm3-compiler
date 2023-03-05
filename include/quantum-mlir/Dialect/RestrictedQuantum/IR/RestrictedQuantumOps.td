@@ -35,9 +35,9 @@ def SqrtX: RestrictedQuantumOp<"sqrtx"> {
     let results = (outs QubitType:$result);
 }
 
-def CX : RestrictedQuantumOp<"cx"> {
-    let arguments = (ins QubitType: $qubit1, QubitType: $qubit2);
-    let results = (outs QubitType: $control, QubitType: $sink);
+def ISWAP : RestrictedQuantumOp<"iswap"> {
+    let arguments = (ins QubitType: q0, QubitType: q1);
+    let results = (outs QubitType: q0_, QubitType: q1_);
 }
 
 def IOp: RestrictedQuantumOp<"I"> {

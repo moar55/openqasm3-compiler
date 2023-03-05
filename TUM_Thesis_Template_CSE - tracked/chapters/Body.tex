@@ -1,6 +1,66 @@
-\section{The approach}
-\section{Code Key Components}
-\subsection{Main Project structure}
-\section{Supported OPENQASM operations}
+\section{Compiling OPENQASM 3.0 using MLIR}
+\subsection{Overview}
+OPENQASM 3.0 compilation goes through a few phases.
+The first one being the frontend compilation phase.
+Namely, the OPENQASM 3.0 code is parsed and converted into an AST,
+using ANTLR4 parser generator, to a c++ runtime target.
+The AST is traversed using the visitor pattern through generated visitor methods.
+These methods are then overriden to generate MLIR code.
+Generation of MLIR code for classical OPENQASM 3.0 instructions is quite straight forward, it 
+is done using MLIR builtin dialects. However, for quantum instructions, we created our 
+own quantum dialect, named \texttt{quantum}, introducing types for qubits, and a set of quantum operations.
+Some quantum optimizations are then performed on theses quantum operations, such as the elimination of identity gates.
+This is then lowered to another dialect called \texttt{restquantum}, which represents a restricted set of quantum gates.
+These set of gates are the ones supported by the Walter Meiner Institute(WMI) quantum computer, as of time of writing.
+This is of course not the only possible lowering step, and can be extended to support other hardware.
+Now, since for the scope of this thesis we were not able to test our code on the WMI quantum computer,
+we created a quantum simulator written purely in MLIR, which can be used to test our code.
+Therefore, the next step for our compilation pipeline is to convert operations of  
+the \texttt{restquantum} dialect to other 
+builtin MLIR dialects. Finally, we lower all the MLIR code to LLVM IR, 
+and then to machine code by LLVM's Just-In-Time (JIT) compiler, to be executed.
+\subsection{Dialects Created}
+The quantum dialect has been created to represent quantum operations, and qubits.
+Both types and operations are opaque. This means that they don't have an inherent 
+interpretation and can be lowered dependant on the target quantum hardware or simulator.
+The main types created are:
+\begin{itemize}
+    \item \texttt{quantum.Array} - represents a quantum register, which is a collection of qubits.
+    \item \texttt{quantum.Qubit} - represents a qubit, which is a quantum bit.
+\end{itemize}
+\subsubsection{Quantum Dialect}
+Theh main operations created are:
+ \begin{itemize}
+    \item \texttt{quantum.qalloc} - allocates a quantum register of size \texttt{size}.
+    \item \texttt{quantum.dealloc} - frees a quantum register.
+    \item \texttt{quantum.qextract} - extracts a qubit from a quantum register, at index \texttt{index}.
+    \item \texttt{quantum.mz} - measures a qubit in the standard basis.
+    \item \texttt{quantum.print\_global\_vector} this is a utility function to print the global quantum state vector in our simulator.
+    \item \texttt{quantum.SingleSimpleGate} - A class representing a single  non-parametrized qubit gate. This is reused to create many other gates.
+    \item \texttt{quantum.RotationGate} - A class representing a single qubit gate, parametrized with an angle operand. This is reused to create other rotation gates.
+    \item \texttt{quantum.cx} - represents a controlled not gate.
+    \item \texttt{quantum.gen\_gate} - represents a generic gate, that takes in an arbitrary number of qubits, and arbitrary number of parameters.
+\end{itemize}
+ \subsubsection{RestQuantum Dialect}
+    The \texttt{restquantum} dialect is a restricted set of quantum gates, which are supported by the WMI quantum computer.
+    The main operations created are:
+    \begin{itemize}
+    \item \texttt{restquantum.rx90} - represents a rotation around the x axis by 90 degrees.
+    \item \texttt{restquantum.rx180} - represents a rotation around the x axis by 180 degrees - equivalent to a Pauli X gate up to a global phase.
+    \item \texttt{restquantum.ry90} - represents a rotation around the y axis by 90 degrees.
+    \item \texttt{restquantum.ry180} - represents a rotation around the y axis by 180 degrees - equivalent to a Pauli Y gate up to a global phase.
+    \item \texttt{restquantum.rz90} - represents a rotation around the z axis by 90 degrees.
+    \item \texttt{restquantum.rz180} - represents a rotation around the z axis by 180 degrees - equivalent to a Pauli Z gate up to a global phase.
+    \end{itemize}
+
+
+\section{Lowering}
+% draw a diagram of the lowering process
+% \draw[->] (0,0) -- (0,1) node[above] {Quantum Dialect};
+% Lowering the code to the \texttt{restquantum} dialect is done by the \texttt{ConvertInst} pass.
+% This pass is run after the \texttt{QuantumOpt} pass, which performs some optimizations on the quantum code.
+% The lowering is done by matching the quantum operations with the \texttt{restquantum} operations.
+% Then the \texttt{restquantum} operations are created, and the \textt{quantum} operations are replaced with them.
+
 \section{Examples - MLIR generated code}
 \subsection{Optimizations}
