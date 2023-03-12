@@ -48,12 +48,11 @@ int main(int argc, char **argv) {
                         (std::istreambuf_iterator<char>() ));
     auto context = std::make_unique<MLIRContext>();
     context->loadDialect<quantum::QuantumDialect, memref::MemRefDialect, arith::ArithDialect,
-        math::MathDialect,
-        complex::ComplexDialect,
-        tensor::TensorDialect, linalg::LinalgDialect, scf::SCFDialect, func::FuncDialect, vector::VectorDialect,LLVM::LLVMDialect, restquantum::RestrictedQuantumDialect>();
+        math::MathDialect, complex::ComplexDialect, scf::SCFDialect, func::FuncDialect,
+        vector::VectorDialect,LLVM::LLVMDialect, restquantum::RestrictedQuantumDialect>();
     MLIRGenerator mlir_generator = MLIRGenerator(*context);
-    mlir_generator.initialize_mlirgen("main");
-    mlir_generator.mlirgen(qasm_src);
+    mlir_generator.initialize("main");
+    mlir_generator.generate(qasm_src);
     ModuleOp module = mlir_generator.get_module();
     module.dump();
     //  mlir::OpPrintingFlags flags;
@@ -72,8 +71,8 @@ int main(int argc, char **argv) {
 
 
     pm.clear();
-    pm.addPass(quantum::createConvertToGenGatePass());
-    pm.addPass(quantum::createConvertInstPass());
+//    pm.addPass(quantum::createConvertToGenGatePass());
+    pm.addPass(quantum::createLowerToRestQuantumPass());
     pm.run(module);
     module.dump();
 
@@ -82,7 +81,7 @@ int main(int argc, char **argv) {
     pm.addPass(mlir::createCSEPass());
     pm.addPass(mlir::createSymbolDCEPass());
     pm.run(module);
-    module.dump();
+//    module.dump();
 
     pm.clear();
     //convert complex to llvm

@@ -1,4 +1,4 @@
-#include "../visitor.hpp"
+#include "../Visitor.hpp"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Vector/IR/VectorOps.h"
 #include "../utils/qasm_utils.hpp"
@@ -43,7 +43,7 @@ mlir::Type get_custom_opaque_type(const std::string& type,
   return mlir::OpaqueType::get(n, type);
 }
 
-std::any visitor::visitQuantumMeasurement(
+std::any Visitor::visitQuantumMeasurement(
         qasmParser::QuantumMeasurementContext* context)  {
   auto indexed_identifier = context->indexedIdentifier();
   auto qubit_var_name = indexed_identifier->Identifier()->getText();
@@ -100,7 +100,7 @@ std::any visitor::visitQuantumMeasurement(
   return output;
 }
 
-std::any visitor::visitQuantumMeasurementAssignment(
+std::any Visitor::visitQuantumMeasurementAssignment(
         qasmParser::QuantumMeasurementAssignmentContext* context) {
   if (context->ARROW()) {
     printErrorMessage("arrow based quantum measurement is not yet supported");

@@ -2,7 +2,7 @@
 #include "mlir/Dialect/Vector/IR/VectorOps.h"
 using namespace mlir;
 
-std::any visitor::visitBuiltInCall(qasmParser::BuiltInCallContext *ctx) {
+std::any Visitor::visitBuiltInCall(qasmParser::BuiltInCallContext *ctx) {
   if (ctx->PRINT()) {
     auto expr = ctx->expressionList()->expression(0);
     qasm_expression_generator generator(builder, symbol_table);

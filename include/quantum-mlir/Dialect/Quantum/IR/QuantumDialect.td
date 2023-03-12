@@ -27,13 +27,13 @@ class QuantumOp<string mnemonic, list<Trait> traits = []> :
         Op<QuantumDialect, mnemonic, traits>;
 
 
-class SingleSimpleGate<string mnemonic> : QuantumOp<mnemonic> {
+class SingleSimpleGate<string mnemonic> : QuantumOp<mnemonic, [NoMemoryEffect]> {
     let arguments = (ins QubitType:$qubit);
     let results = (outs QubitType:$result);
 }
 
 
-class RotationGate<string mnemonic> : QuantumOp<mnemonic> {
+class RotationGate<string mnemonic> : QuantumOp<mnemonic, [NoMemoryEffect]> {
     let arguments = (ins QubitType:$qubit, F64:$angle);
     let results = (outs QubitType:$result);
 }

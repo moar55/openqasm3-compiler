@@ -11,7 +11,7 @@
 
 using namespace mlir;
 
-class visitor : public qasmBaseVisitor {
+class Visitor : public qasmBaseVisitor {
 public:
     template <typename OpTy, typename... Args>
     OpTy createOp(Args... args) {
@@ -24,9 +24,9 @@ public:
     int offset = 0;
 
     // The constructor, instantiates commonly used opaque types
-     visitor(mlir::OpBuilder b, mlir::ModuleOp m, std::string &fname);
+     Visitor(mlir::OpBuilder b, mlir::ModuleOp m, std::string &fname);
 
-    ~visitor();
+    ~Visitor();
 
     // Visit nodes corresponding to quantum variable and gate declarations.
     // see visitor_handlers/quantum_types_handler.cpp for implementation

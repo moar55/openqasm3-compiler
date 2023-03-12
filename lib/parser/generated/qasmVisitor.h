@@ -11,7 +11,7 @@
 namespace mlir {
 
 /**
- * This class defines an abstract visitor for a parse tree
+ * This class defines an abstract Visitor for a parse tree
  * produced by qasmParser.
  */
 class  qasmVisitor : public antlr4::tree::AbstractParseTreeVisitor {

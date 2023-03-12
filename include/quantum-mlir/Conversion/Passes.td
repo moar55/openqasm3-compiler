@@ -10,9 +10,9 @@ def ConvertToGenGate: Pass<"quantum-convert-to-gen-gate", "ModuleOp"> {
     }];
 }
 
-def ConvertInst: Pass<"quantum-convert-inst", "ModuleOp"> {
-    let summary = "Convert inst to rest quantum insts";
-    let constructor = "mlir::quantum::createConvertInstPass()";
+def LowerToRestQuantum: Pass<"lower-to-restquantum", "ModuleOp"> {
+    let summary = "Lower quantum dialect instructions to restricted quantum dialect instructions";
+    let constructor = "mlir::quantum::createLowerToRestQuantumPass()";
     let description = [{
     }];
 }

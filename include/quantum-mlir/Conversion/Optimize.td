@@ -2,7 +2,10 @@ include "mlir/IR/PatternBase.td"
 include "QuantumOps.td"
 include "mlir/Dialect/Arith/IR/ArithOps.td"
 
-def HYHZ: Pat<(HOp (YOp (HOp $input))), (YOp $input)>;
+def HYH: Pat<(HOp (YOp (HOp $input))), (YOp $input)>;
+def HXH: Pat<(HOp (XOp (HOp $input))), (ZOp $input)>;
+def HZH: Pat<(HOp (ZOp (HOp $input))), (XOp $input)>;
+def HZXH: Pat<(HOp (ZOp (XOp (HOp $input)))), (YOp $input)>;
 def HIdentity: Pat<(HOp (HOp $input)), (replaceWithValue $input)>;
 def XIdentity: Pat<(XOp (XOp $input)), (replaceWithValue $input)>;
 def YIdentity: Pat<(YOp (YOp $input)), (replaceWithValue $input)>;

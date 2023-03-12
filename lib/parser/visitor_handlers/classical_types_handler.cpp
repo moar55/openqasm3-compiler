@@ -5,7 +5,7 @@
 #include "mlir/Dialect/Vector/IR/VectorOps.h"
 
 using namespace mlir;
-std::any visitor::visitSingleDesignatorDeclaration(
+std::any Visitor::visitSingleDesignatorDeclaration(
         qasmParser::SingleDesignatorDeclarationContext* context) {
   //TODO: make sure a variable is not redeclared!
   auto type = context->singleDesignatorType()->getText();
@@ -64,7 +64,7 @@ std::any visitor::visitSingleDesignatorDeclaration(
   return {};
 }
 
-std::any visitor::visitBitDeclaration(
+std::any Visitor::visitBitDeclaration(
         qasmParser::BitDeclarationContext* context) {
   // bitDeclaration
   //     : bitType (indexIdentifierList | indexEqualsAssignmentList )
@@ -116,7 +116,7 @@ std::any visitor::visitBitDeclaration(
   return 0;
 }
 
-std::any visitor::visitClassicalAssignment(qasmParser::ClassicalAssignmentContext *ctx) {
+std::any Visitor::visitClassicalAssignment(qasmParser::ClassicalAssignmentContext *ctx) {
   auto identifier = ctx->indexedIdentifier()->Identifier();
   auto ass_operator = ctx->assignmentOperator();
   std::string identifier_text = identifier->getText();

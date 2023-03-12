@@ -33,7 +33,7 @@ void find_symbols(qasmParser::ExpressionContext *ctx, std::set<std::string> &sym
   }
 }
 
-std::any visitor::visitLoopStatement(qasmParser::LoopStatementContext *ctx) {
+std::any Visitor::visitLoopStatement(qasmParser::LoopStatementContext *ctx) {
   auto signature = ctx->loopSignature();
   if (signature->getStart()->getText() == "while") {
     auto cond = signature->expression();

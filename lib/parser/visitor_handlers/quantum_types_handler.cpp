@@ -1,11 +1,11 @@
-#include "../visitor.hpp"
+#include "../Visitor.hpp"
 #include "quantum-mlir/Dialect/Quantum/IR/QuantumOps.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "expression_handler.h"
 
 using namespace mlir;
 
-std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext *context) {
+std::any Visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext *context) {
   //TODO: disallow non const expressions for designator
 
   std::string var_name = context->Identifier()->getText();
@@ -116,7 +116,7 @@ std::any visitor::visitQuantumDeclaration(qasmParser::QuantumDeclarationContext 
 //  return {};
 //}
 
-std::any visitor::visitQuantumGateDefinition(qasmParser::QuantumGateDefinitionContext *context) {
+std::any Visitor::visitQuantumGateDefinition(qasmParser::QuantumGateDefinitionContext *context) {
   std::cout<< "In there boooi"<<std::endl;
   return {};
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mlir/IR/BuiltinOps.h"
-#include "../visitor.hpp"
+#include "../Visitor.hpp"
 #include "../utils/qasm_utils.hpp"
 #include "../utils/symbol_table.hpp"
 

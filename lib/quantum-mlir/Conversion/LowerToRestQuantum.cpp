@@ -136,7 +136,7 @@ public :
           std::cout << "CX requires two operands" << std::endl;
           exit(1);
         }
-        rewriter.replaceOpWithNewOp<restquantum::CX>(op, op.getOperand(0).getType(), op.getOperand(1).getType(), op->getOperand(0),
+        rewriter.replaceOpWithNewOp<restquantum::CXOp>(op, op.getOperand(0).getType(), op.getOperand(1).getType(), op->getOperand(0),
                                                      op.getOperand(1));
       } else {
         std::cout << gate_name + " gate is not supported" << std::endl;
@@ -160,21 +160,186 @@ public :
     };
 };
 
-class ConvertInst
-        : public quantum::ConvertInstBase<ConvertInst> {
+class ConvertGenGate: public OpConversionPattern<quantum::GenGate> {
+public:
+    using OpConversionPattern::OpConversionPattern;
+    LogicalResult matchAndRewrite(quantum::GenGate op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+
+        auto gate_name = op.getNameAttr().str();
+        // gate not supported for restquantum conversion yet
+        std::cout << gate_name + " gate is not supported for restquantum conversion yet" << std::endl;
+        exit(1);
+    }
+};
+
+class ConvertXGate : public OpConversionPattern<quantum::XOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::XOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        rewriter.replaceOpWithNewOp<restquantum::Rx180Op>(op, op->getOperand(0).getType(), op->getOperand(0));
+        return success();
+ }
+};
+
+class ConvertYGate : public OpConversionPattern<quantum::YOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::YOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        rewriter.replaceOpWithNewOp<restquantum::Ry180Op>(op, op->getOperand(0).getType(), op->getOperand(0));
+        return success();
+    }
+};
+
+class ConvertZGate : public OpConversionPattern<quantum::ZOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::ZOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        FloatType f64 = rewriter.getF64Type();
+        FloatAttr pi_attr = FloatAttr::get(f64, M_PI);
+        Value pi_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_attr, f64).getResult();
+        rewriter.replaceOpWithNewOp<restquantum::RzOp>(op, op->getOperand(0).getType(), op->getOperand(0), pi_op);
+        return success();
+    }
+};
+
+class ConvertHGate : public OpConversionPattern<quantum::HOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::HOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        auto val = rewriter.replaceOpWithNewOp<restquantum::Ry90Op>(op, op->getOperand(0).getType(), op->getOperand(0));
+        rewriter.create<restquantum::Rx180Op>(rewriter.getUnknownLoc(), val.getType(), val.getResult());
+        return success();
+    }
+};
+
+class ConvertCXGate : public OpConversionPattern<quantum::CXOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::CXOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        // refactor later, now just use restquantum::CX
+        rewriter.replaceOpWithNewOp<restquantum::CXOp>(op, op->getOperand(0).getType(), op->getOperand(1).getType(), op->getOperand(0), op->getOperand(1));
+        return success();
+    }
+};
+
+class ConvertRXGate: public OpConversionPattern<quantum::RxOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::RxOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        // use RX = RZ(pi)SX_RZ(theta + pi)SX_RZ(pi/2)
+        Value operand = op.getOperand(0);
+        auto loc = operand.getLoc();
+        FloatType f64 = rewriter.getF64Type();
+
+        FloatAttr pi_attr = FloatAttr::get(f64, M_PI);
+        Value pi_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_attr, f64).getResult();
+
+        FloatAttr pi2_attr = FloatAttr::get(f64, M_PI_2);
+        Value pi2_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi2_attr, f64).getResult();
+
+        //Rz(pi/2)
+        operand = rewriter.create<restquantum::RzOp>( loc, operand.getType(), operand, pi2_op);
+        loc = rewriter.getUnknownLoc();
+
+        //Sqrt X
+        operand = rewriter.create<restquantum::SqrtX>(loc, operand.getType(), operand);
+        loc = rewriter.getUnknownLoc();
+
+        // Rz(theta + pi)
+        Value theta = op.getOperand(1);
+        Value angle_op = rewriter.create<arith::AddFOp>(loc, theta, pi_op); // theta + pi
+        loc = rewriter.getUnknownLoc();
+        operand = rewriter.create<restquantum::RzOp>(loc, operand.getType(), operand, angle_op);
+        loc = rewriter.getUnknownLoc();
+
+        //Sqrt x
+        operand = rewriter.create<restquantum::SqrtX>(loc, operand.getType(), operand);
+        loc = rewriter.getUnknownLoc();
+
+        // Rz(pi)
+        rewriter.replaceOpWithNewOp<restquantum::RzOp>(op, operand.getType(), operand, angle_op);
+        return success();
+    }
+};
+
+
+class ConvertRYGate: public OpConversionPattern<quantum::RyOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::RyOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        Value operand = op.getOperand(0);
+        auto loc = operand.getLoc();
+
+        //RX(pi/2)
+        rewriter.create<restquantum::Rx90Op>(loc, operand.getType(), operand);
+        loc = rewriter.getUnknownLoc();
+
+        // Rz(theta + pi)
+        FloatType f64 = rewriter.getF64Type();
+        FloatAttr pi_attr = FloatAttr::get(f64, M_PI);
+        Value pi_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_attr, f64).getResult();
+        Value theta = op.getOperand(1);
+        Value angle_op = rewriter.create<arith::AddFOp>(loc, theta, pi_op); // theta + pi
+        loc = rewriter.getUnknownLoc();
+        operand = rewriter.create<restquantum::RzOp>(loc,  operand.getType(), operand, angle_op);
+
+        //RX(pi/2)
+        operand = rewriter.create<restquantum::Rx90Op>(loc,  operand.getType(), operand);
+        loc = rewriter.getUnknownLoc();
+
+        //RZ(pi)
+        rewriter.replaceOpWithNewOp<restquantum::RzOp>(op, operand.getType(), operand, pi_op);
+        return success();
+    }
+};
+
+
+class ConvertRZGate: public OpConversionPattern<quantum::RzOp> {
+public :
+    using OpConversionPattern::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(quantum::RzOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+    rewriter.replaceOpWithNewOp<restquantum::RzOp>(op, op.getOperand(0).getType(), op.getOperand(0), op.getAngle());
+        return success();
+    }
+};
+
+
+class LowerToRestQuantum
+        : public quantum::LowerToRestQuantumBase<LowerToRestQuantum> {
 public:
     void runOnOperation() override {
       MLIRContext *context = &getContext();
       ConversionTarget target(*context);
-      target.addLegalOp<ModuleOp>();
       target.addLegalDialect<
               memref::MemRefDialect,arith::ArithDialect,
-              quantum::QuantumDialect, restquantum::RestrictedQuantumDialect, vector::VectorDialect, func::FuncDialect, scf::SCFDialect>();
+              restquantum::RestrictedQuantumDialect, vector::VectorDialect, func::FuncDialect, scf::SCFDialect>();
+
+      target.addIllegalDialect<quantum::QuantumDialect>();
+      target.addLegalOp<ModuleOp, quantum::MzOp, quantum::ExtractQubitOp, quantum::QallocOp, quantum::PrintGlobalVectorOp>();
+//      target.addIllegalOp<quantum::GenGate, quantum::HOp, quantum::XOp>();
       TypeConverter typeConverter;
       typeConverter.addConversion([](Type type) {return type;});
       RewritePatternSet patterns(context);
-      target.addIllegalOp<quantum::GenGate>();
-      patterns.add<ConvertInstRewrite>(typeConverter, context);
+      patterns.add<ConvertXGate, ConvertYGate, ConvertZGate, ConvertHGate, ConvertCXGate,
+      ConvertRXGate, ConvertRYGate, ConvertRZGate, ConvertGenGate>(typeConverter, context);
+//      patterns.add<ConvertInstRewrite>(typeConverter, context);
       if (failed(applyFullConversion(getOperation(), target,
                                         std::move(patterns)))) {
         return signalPassFailure();
@@ -183,6 +348,6 @@ public:
 };
 
 std::unique_ptr<OperationPass<ModuleOp>>
-mlir::quantum::createConvertInstPass() {
-  return std::make_unique<ConvertInst>();
+mlir::quantum::createLowerToRestQuantumPass() {
+  return std::make_unique<LowerToRestQuantum>();
 }

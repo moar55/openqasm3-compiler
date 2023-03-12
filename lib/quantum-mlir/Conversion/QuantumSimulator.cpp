@@ -199,158 +199,189 @@ public:
                                                               one_val_prob, prob);
             }
         }
+        //TODO: revert back to comparison of a random value
 
-        // fill a memref with 0's and 1's according to the probabilities
-        // allocate a memref of i1 of size 10
-        auto memref_type = MemRefType::get({10}, rewriter.getI1Type());
-        auto memref = rewriter.create<memref::AllocOp>(rewriter.getUnknownLoc(), memref_type);
-        // for the zero probability
-        // multiply by 10, then convert to int
-        // multiply
-        zer_val_prob = rewriter.create<arith::MulFOp>(rewriter.getUnknownLoc(), rewriter.getF64Type(), zer_val_prob,
-                                                      rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                                                         FloatAttr::get(
-                                                                                                 rewriter.getF64Type(),
-                                                                                                 10.0)));
-        // convert to int
-        zer_val_prob = rewriter.create<arith::FPToUIOp>(rewriter.getUnknownLoc(), rewriter.getI64Type(), zer_val_prob);
-        // loop over the memref and fill it with 0's and 1's
-        // fill with zero till the value of zer_val_prob
-        auto zero_i1 = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                          IntegerAttr::get(rewriter.getI1Type(), 0));
-        auto one_i1 = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                         IntegerAttr::get(rewriter.getI1Type(), 1));
-
-        auto zero_index = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                             IntegerAttr::get(rewriter.getIndexType(), 0));
-        auto end_index = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                            IntegerAttr::get(rewriter.getIndexType(), 10 + 1));
-        auto step = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                       IntegerAttr::get(rewriter.getIndexType(), 1));
-//
-
-//        auto result = rewriter.create<scf::ForOp>(rewriter.getUnknownLoc(), zero_index, end_index, step, std::vector<Value>{zero_i1}, [&](OpBuilder &builder, Location loc, Value iv, ValueRange args) {
-//            // if the index is less than the value of zer_val_prob, fill with 0
-//            // convert iv index to i64
-////            auto iv_i64 = builder.create<arith::IndexCastUIOp>(builder.getUnknownLoc(),builder.getI64Type(),iv);
-////            auto cmp = builder.create<arith::CmpIOp>(builder.getUnknownLoc(), arith::CmpIPredicate::slt, iv_i64, zer_val_prob);
-////            auto value = builder.create<arith::SelectOp>(builder.getUnknownLoc(), cmp, zero_i1, one_i1);
-//            auto value = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), IntegerAttr::get(builder.getI1Type(), 0));
-//            builder.create<scf::YieldOp>(builder.getUnknownLoc(),  std::vector<Value>{value});
-//        });
-
-        // fill with zero till the value of zer_val_prob
-        // for loop doesn't work for some reason, so unrolling the loop for now (beyond hacky :/)
-        {
-            // index 0
-            Value iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                          IntegerAttr::get(rewriter.getIndexType(), 0));
-            // cast to i64
-            auto iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            auto cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64,
-                                                      zer_val_prob);
-            Value value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 1
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 1));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 2
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 2));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 3
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 3));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 4
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 4));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 5
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 5));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-
-            // index 6
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 6));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 7
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 7));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 8
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 8));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 9
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 9));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-
-            // index 10
-            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                    IntegerAttr::get(rewriter.getIndexType(), 10));
-            // cast to i64
-            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
-            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
-            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
-            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
-        }
-
-        // generate a random number between 0 and 1 using c++11
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<> dis(0, 10);
+        std::uniform_real_distribution<> dis(0, 1);
         double rand_num = dis(gen);
-        // floor this value
-        rand_num = std::floor(rand_num);
-        std::cout << "the rand val" << rand_num << std::endl;
-        // build an mlir index from this
-        auto rand_index = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), (int)rand_num));
-        // draw random value from the memref
-        Value ret_val = rewriter.create<memref::LoadOp>(rewriter.getUnknownLoc(), memref, ArrayRef<Value>{rand_index});
 
-        rewriter.create<vector::PrintOp>(rewriter.getUnknownLoc(), ret_val);
-        rewriter.replaceOp(op, ret_val);
+
+        // get mlir value of the random number
+        auto rand_val = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+                                                           FloatAttr::get(rewriter.getF64Type(), rand_num));
+        // compare to the zero probability
+        auto cmp = rewriter.create<arith::CmpFOp>(rewriter.getUnknownLoc(), rewriter.getI1Type(),
+                                                  arith::CmpFPredicate::OLE, rand_val, zer_val_prob);
+
+
+        // zero i1 mlir val
+        auto zero_i1 = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+                                                          IntegerAttr::get(rewriter.getIntegerType(1), 0));
+        // one i1 mlir val
+        auto one_i1 = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+                                                         IntegerAttr::get(rewriter.getIntegerType(1), 1));
+        // if the random number is less than or equals to the zero probability, then measure 0
+        // otherwise measure 1
+        // use select to choose between the two values
+        auto select = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), rewriter.getI1Type(), cmp, zero_i1, one_i1);
+        rewriter.replaceOp(op, select.getResult());
         return success();
+
+
+//
+//
+//
+//        // fill a memref with 0's and 1's according to the probabilities
+//        // allocate a memref of i1 of size 10
+//        auto memref_type = MemRefType::get({10}, rewriter.getI1Type());
+//        auto memref = rewriter.create<memref::AllocOp>(rewriter.getUnknownLoc(), memref_type);
+//        // for the zero probability
+//        // multiply by 10, then convert to int
+//        // multiply
+//        zer_val_prob = rewriter.create<arith::MulFOp>(rewriter.getUnknownLoc(), rewriter.getF64Type(), zer_val_prob,
+//                                                      rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                                                         FloatAttr::get(
+//                                                                                                 rewriter.getF64Type(),
+//                                                                                                 10.0)));
+//        // convert to int
+//        zer_val_prob = rewriter.create<arith::FPToUIOp>(rewriter.getUnknownLoc(), rewriter.getI64Type(), zer_val_prob);
+//        // loop over the memref and fill it with 0's and 1's
+//        // fill with zero till the value of zer_val_prob
+//        auto zero_i1 = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                          IntegerAttr::get(rewriter.getI1Type(), 0));
+//        auto one_i1 = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                         IntegerAttr::get(rewriter.getI1Type(), 1));
+//
+//        auto zero_index = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                             IntegerAttr::get(rewriter.getIndexType(), 0));
+//        auto end_index = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                            IntegerAttr::get(rewriter.getIndexType(), 10 + 1));
+//        auto step = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                       IntegerAttr::get(rewriter.getIndexType(), 1));
+////
+//
+////        auto result = rewriter.create<scf::ForOp>(rewriter.getUnknownLoc(), zero_index, end_index, step, std::vector<Value>{zero_i1}, [&](OpBuilder &builder, Location loc, Value iv, ValueRange args) {
+////            // if the index is less than the value of zer_val_prob, fill with 0
+////            // convert iv index to i64
+//////            auto iv_i64 = builder.create<arith::IndexCastUIOp>(builder.getUnknownLoc(),builder.getI64Type(),iv);
+//////            auto cmp = builder.create<arith::CmpIOp>(builder.getUnknownLoc(), arith::CmpIPredicate::slt, iv_i64, zer_val_prob);
+//////            auto value = builder.create<arith::SelectOp>(builder.getUnknownLoc(), cmp, zero_i1, one_i1);
+////            auto value = builder.create<arith::ConstantOp>(builder.getUnknownLoc(), IntegerAttr::get(builder.getI1Type(), 0));
+////            builder.create<scf::YieldOp>(builder.getUnknownLoc(),  std::vector<Value>{value});
+////        });
+//
+//        // fill with zero till the value of zer_val_prob
+//        // for loop doesn't work for some reason, so unrolling the loop for now (beyond hacky :/)
+//        {
+//            // index 0
+//            Value iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                          IntegerAttr::get(rewriter.getIndexType(), 0));
+//            // cast to i64
+//            auto iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            auto cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64,
+//                                                      zer_val_prob);
+//            Value value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 1
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 1));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 2
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 2));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 3
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 3));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 4
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 4));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 5
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 5));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//
+//            // index 6
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 6));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 7
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 7));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 8
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 8));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 9
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), 9));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//
+//            // index 10
+//            iv = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
+//                                                    IntegerAttr::get(rewriter.getIndexType(), 10));
+//            // cast to i64
+//            iv_64 = rewriter.create<arith::IndexCastOp>(rewriter.getUnknownLoc(), rewriter.getIntegerType(64), iv);
+//            cmp = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), arith::CmpIPredicate::slt, iv_64, zer_val_prob);
+//            value = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), cmp, zero_i1, one_i1);
+//            rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), value, memref, ArrayRef<Value>{iv});
+//        }
+//
+//        // generate a random number between 0 and 1 using c++11
+//        std::random_device rd;
+//        std::mt19937 gen(rd());
+//        std::uniform_real_distribution<> dis(0, 10);
+//        double rand_num = dis(gen);
+//        // floor this value
+//        rand_num = std::floor(rand_num);
+//        std::cout << "the rand val" << rand_num << std::endl;
+//        // build an mlir index from this
+//        auto rand_index = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), IntegerAttr::get(rewriter.getIndexType(), (int)rand_num));
+//        // draw random value from the memref
+//        Value ret_val = rewriter.create<memref::LoadOp>(rewriter.getUnknownLoc(), memref, ArrayRef<Value>{rand_index});
+//
+//        rewriter.replaceOp(op, ret_val);
+//        return success();
         // normalize global vector
 
 
@@ -463,6 +494,7 @@ public:
 
         auto zero =  rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), FloatAttr::get(rewriter.getF64Type(), 0), rewriter.getF64Type());
         auto neg_1 = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), FloatAttr::get(rewriter.getF64Type(), -1), rewriter.getF64Type());
+        // TODO: remove the global phase
 
         // flip the two columns (second dimension
         for (int i = 0; i < out_shape[0]; i++) {
@@ -592,6 +624,7 @@ public:
                 first_column_ = rewriter.create<vector::InsertOp>(rewriter.getUnknownLoc(), new_real, first_column_, ArrayRef<int64_t>{j,0});
                 first_column_ = rewriter.create<vector::InsertOp>(rewriter.getUnknownLoc(), new_imag, first_column_, ArrayRef<int64_t>{j,1});
             }
+
             for (int j = 0; j < out_shape[2]; j++) {
                 auto real = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), first_column, ArrayRef<int64_t>{j,0});
                 auto imag = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), first_column, ArrayRef<int64_t>{j,1});

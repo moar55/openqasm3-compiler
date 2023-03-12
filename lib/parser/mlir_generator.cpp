@@ -10,7 +10,7 @@
  *******************************************************************************/
 #include "mlir_generator.hpp"
 
-#include "visitor.hpp"
+#include "Visitor.hpp"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "generated/qasmLexer.h"
@@ -18,7 +18,7 @@
 
 using namespace mlir;
 
-void MLIRGenerator::initialize_mlirgen(
+void MLIRGenerator::initialize(
         const std::string entry_function_name) {
 
   auto int_type = builder.getI64Type();
@@ -33,14 +33,14 @@ void MLIRGenerator::initialize_mlirgen(
 }
 
 
-void MLIRGenerator::mlirgen(const std::string &src) {
+void MLIRGenerator::generate(const std::string &src) {
   using namespace antlr4;
 
   if (!my_visitor) {
-    my_visitor = std::make_shared<visitor>(builder, m_module, file_name
+    my_visitor = std::make_shared<Visitor>(builder, m_module, file_name
             /*,enable_qir_apply_ifelse*/);
   }
-//  auto symbol_table = visitor->getScopedSymbolTable();
+//  auto symbol_table = Visitor->getScopedSymbolTable();
 
   ANTLRInputStream input(src);
   qasmLexer lexer(&input);

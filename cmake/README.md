@@ -98,7 +98,7 @@ The options are:
 * `LEXER` - specify that the input file is a lexer grammar
 * `PARSER` - specify that the input file is a parser grammar
 * `LISTENER` - tell ANTLR tool to generate a parse tree listener
-* `VISITOR` - tell ANTLR tool to generate a parse tree visitor
+* `VISITOR` - tell ANTLR tool to generate a parse tree Visitor
 
 ### Examples
 

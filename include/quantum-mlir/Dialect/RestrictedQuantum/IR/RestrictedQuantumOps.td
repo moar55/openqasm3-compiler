@@ -3,6 +3,7 @@
 
 include "RestrictedQuantumDialect.td"
 include "../../Quantum/IR/QuantumTypes.td"
+include "mlir/Interfaces/SideEffectInterfaces.td"
 
 def Rx90Op :  RestrictedQuantumOp<"rx90"> {
     let arguments = (ins QubitType:$qubit);
@@ -35,9 +36,16 @@ def SqrtX: RestrictedQuantumOp<"sqrtx"> {
     let results = (outs QubitType:$result);
 }
 
+//TODO: remove and only use ISWAP when rewriting CNOTs
+def CXOp : RestrictedQuantumOp<"cx", [NoMemoryEffect]> {
+let arguments = (ins QubitType: $qubit1, QubitType: $qubit2);
+let results = (outs QubitType: $control, QubitType: $sink);
+}
+
+
 def ISWAP : RestrictedQuantumOp<"iswap"> {
-    let arguments = (ins QubitType: q0, QubitType: q1);
-    let results = (outs QubitType: q0_, QubitType: q1_);
+    let arguments = (ins QubitType: $q0, QubitType: $q1);
+    let results = (outs QubitType: $q0_, QubitType: $q1_);
 }
 
 def IOp: RestrictedQuantumOp<"I"> {

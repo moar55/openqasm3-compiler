@@ -1,4 +1,4 @@
-#include "visitor.hpp"
+#include "Visitor.hpp"
 
 #include "antlr4-runtime.h"
 
@@ -10,17 +10,17 @@
 #include "quantum-mlir/Dialect/Quantum/IR/QuantumOps.h"
 
 // The constructor, instantiates commonly used opaque types
-visitor::visitor(mlir::OpBuilder b, mlir::ModuleOp m, std::string &fname) : builder(b), m_module(m), file_name(fname) {
+Visitor::Visitor(mlir::OpBuilder b, mlir::ModuleOp m, std::string &fname) : builder(b), m_module(m), file_name(fname) {
   auto context = b.getContext();
-  llvm::StringRef name("quantum"), qubit_type_name("Qubit"), array_type_name("Array"), result_type_name("Result");
+  llvm::StringRef name("quantum"), qubit_type_name("Qubit"), qubit_array_type("QubitArray"), result_type_name("Result");
   StringAttr n = StringAttr::get(context, name); // namespace
   qubit_type = mlir::OpaqueType::get(n, qubit_type_name);
-  array_type = mlir::OpaqueType::get(n, array_type_name);
+  array_type = mlir::OpaqueType::get(n, qubit_array_type);
   result_type = mlir::OpaqueType::get(n, result_type_name);
   symbol_table.set_op_builder(builder);
 }
 
-void visitor::gen_yield_of_symbols(const std::set<std::string> yield_symbols) {
+void Visitor::gen_yield_of_symbols(const std::set<std::string> yield_symbols) {
   std::vector<Value> yield_qubits;
   for (auto const& symbol: yield_symbols) {
     if (symbol_table.has_symbol(symbol)) {
@@ -39,7 +39,7 @@ void visitor::gen_yield_of_symbols(const std::set<std::string> yield_symbols) {
 }
 
 
-mlir::Type visitor::get_symbol_type(const std::string &var_name) {
+mlir::Type Visitor::get_symbol_type(const std::string &var_name) {
   if (symbol_table.has_symbol(var_name)) {
     return symbol_table.get_symbol(var_name).getType();
   }
@@ -70,4 +70,4 @@ mlir::Type visitor::get_symbol_type(const std::string &var_name) {
 //}
 
 
-visitor::~visitor() {}
+Visitor::~Visitor() {}

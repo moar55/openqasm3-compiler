@@ -1,0 +1,1 @@
+{"rule":"A_GOOGLE","sentence":"^\\QIn either of these cases, we can use a Quantum processing unit (QPU) as an accelerator alongside a Central processing unit (CPU), where the QPU can solve problems that QPUs excel in, and the CPU can solve problems that CPU's excel in, such as conditionals, loops...etc.\\E$"}

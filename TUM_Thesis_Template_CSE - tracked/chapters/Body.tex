@@ -1,66 +1,309 @@
 \section{Compiling OPENQASM 3.0 using MLIR}
+% draw a diagram of the compilation pipeline
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics{images/pipeline.eps}
+    \caption[caption]{Compilation Pipeline Stages}
+    \medskip
+    \small
+    Note: the dotted line is to show that the quantum simulator
+    is an optional lowering step and can be circumvented when deploying on 
+    real quantum hardware.
+    \label{fig:compilation_pipeline}
+
+\end{figure}
+
 \subsection{Overview}
-OPENQASM 3.0 compilation goes through a few phases.
-The first one being the frontend compilation phase.
-Namely, the OPENQASM 3.0 code is parsed and converted into an AST,
-using ANTLR4 parser generator, to a c++ runtime target.
-The AST is traversed using the visitor pattern through generated visitor methods.
-These methods are then overriden to generate MLIR code.
-Generation of MLIR code for classical OPENQASM 3.0 instructions is quite straight forward, it 
-is done using MLIR builtin dialects. However, for quantum instructions, we created our 
-own quantum dialect, named \texttt{quantum}, introducing types for qubits, and a set of quantum operations.
-Some quantum optimizations are then performed on theses quantum operations, such as the elimination of identity gates.
-This is then lowered to another dialect called \texttt{restquantum}, which represents a restricted set of quantum gates.
-These set of gates are the ones supported by the Walter Meiner Institute(WMI) quantum computer, as of time of writing.
-This is of course not the only possible lowering step, and can be extended to support other hardware.
-Now, since for the scope of this thesis we were not able to test our code on the WMI quantum computer,
-we created a quantum simulator written purely in MLIR, which can be used to test our code.
-Therefore, the next step for our compilation pipeline is to convert operations of  
-the \texttt{restquantum} dialect to other 
-builtin MLIR dialects. Finally, we lower all the MLIR code to LLVM IR, 
-and then to machine code by LLVM's Just-In-Time (JIT) compiler, to be executed.
+
+OPENQASM 3.0 compilation goes through a few phases. The first one being the
+frontend compilation phase. Namely, the OPENQASM 3.0 code is parsed and
+converted into a Concrete Syntax Tree (CST), using ANTLR4 parser generator, to a
+c++ runtime target. The CST is traversed using the visitor pattern through
+generated visitor methods. These methods are then overridden to generate MLIR
+code. Generation of MLIR code for classical OPENQASM 3.0 instructions is quite
+straight forward, it is done using MLIR built-in dialects. However, for quantum
+instructions, we created our own quantum dialect, named \texttt{quantum},
+introducing types for qubits, and a set of quantum operations. Some quantum
+optimizations are then performed on theses quantum operations, such as the
+elimination of identity gates. This is then lowered to another dialect called
+\texttt{restquantum}, which represents a restricted set of quantum gates. These
+set of gates are the ones supported by the Walter Meiner Institute(WMI) quantum
+computer, as of time of writing. This is of course not the only possible
+lowering step, and can be extended to support other hardware. Now, since for the
+scope of this thesis we were not able to test our code on the WMI quantum
+computer, we created a quantum simulator written purely in MLIR, which can be
+used to test our code. Therefore, the next step for our compilation pipeline is
+to convert operations of  
+the \texttt{restquantum} dialect to other builtin MLIR dialects. Finally, we
+lower all the MLIR code to LLVM IR, and then to machine code by LLVM's
+Just-In-Time (JIT) compiler, to be executed.
+An overview of the stages of the pipeline are shown in Figure \ref{fig:compilation_pipeline}.
+
 \subsection{Dialects Created}
-The quantum dialect has been created to represent quantum operations, and qubits.
-Both types and operations are opaque. This means that they don't have an inherent 
-interpretation and can be lowered dependant on the target quantum hardware or simulator.
-The main types created are:
+The quantum dialect has been created to represent quantum operations, and
+qubits. Both types and operations are opaque. This means that they don't have an
+inherent interpretation and can be lowered dependant on the target quantum
+hardware or simulator. The main types created are:
 \begin{itemize}
-    \item \texttt{quantum.Array} - represents a quantum register, which is a collection of qubits.
+    \item \texttt{quantum.Array} - represents a quantum register, which is a
+    collection of qubits.
     \item \texttt{quantum.Qubit} - represents a qubit, which is a quantum bit.
 \end{itemize}
 \subsubsection{Quantum Dialect}
-Theh main operations created are:
+The main operations created are:
  \begin{itemize}
-    \item \texttt{quantum.qalloc} - allocates a quantum register of size \texttt{size}.
+    \item \texttt{quantum.qalloc} - allocates a quantum register of size
+    \texttt{size}.
     \item \texttt{quantum.dealloc} - frees a quantum register.
-    \item \texttt{quantum.qextract} - extracts a qubit from a quantum register, at index \texttt{index}.
+    \item \texttt{quantum.qextract} - extracts a qubit from a quantum register,
+    at index \texttt{index}.
     \item \texttt{quantum.mz} - measures a qubit in the standard basis.
-    \item \texttt{quantum.print\_global\_vector} this is a utility function to print the global quantum state vector in our simulator.
-    \item \texttt{quantum.SingleSimpleGate} - A class representing a single  non-parametrized qubit gate. This is reused to create many other gates.
-    \item \texttt{quantum.RotationGate} - A class representing a single qubit gate, parametrized with an angle operand. This is reused to create other rotation gates.
-    \item \texttt{quantum.cx} - represents a controlled not gate.
-    \item \texttt{quantum.gen\_gate} - represents a generic gate, that takes in an arbitrary number of qubits, and arbitrary number of parameters.
+    \item \texttt{quantum.print\_global\_vector} this is a utility function to
+    print the global quantum state vector in our simulator.
+    \item \texttt{quantum.SingleSimpleGate} - A class representing a single
+    non-parametrized qubit gate. This is reused to create many other gates.
+    \item \texttt{quantum.RotationGate} - A class representing a single qubit
+    gate, parametrized with an angle operand. This is reused to create other
+    rotation gates.
+    \item \texttt{quantum.cx} - represents a controlled x gate.
+    \item \texttt{quantum.gen\_gate} - represents a generic gate, that takes in
+    an arbitrary number of qubits, and arbitrary number of parameters.
 \end{itemize}
  \subsubsection{RestQuantum Dialect}
-    The \texttt{restquantum} dialect is a restricted set of quantum gates, which are supported by the WMI quantum computer.
-    The main operations created are:
+    The \texttt{restquantum} dialect is a restricted set of quantum gates, which
+    are supported by the WMI quantum computer. All these gates, except for the iSWAP gate, 
+    perform a rotation around an axis in the Bloch sphere, at certain angles.
+    These gates are:
     \begin{itemize}
-    \item \texttt{restquantum.rx90} - represents a rotation around the x axis by 90 degrees.
-    \item \texttt{restquantum.rx180} - represents a rotation around the x axis by 180 degrees - equivalent to a Pauli X gate up to a global phase.
-    \item \texttt{restquantum.ry90} - represents a rotation around the y axis by 90 degrees.
-    \item \texttt{restquantum.ry180} - represents a rotation around the y axis by 180 degrees - equivalent to a Pauli Y gate up to a global phase.
-    \item \texttt{restquantum.rz90} - represents a rotation around the z axis by 90 degrees.
-    \item \texttt{restquantum.rz180} - represents a rotation around the z axis by 180 degrees - equivalent to a Pauli Z gate up to a global phase.
+    \item \texttt{restquantum.rx90} - represents a rotation around the x axis by
+    90 degrees.
+    \item \texttt{restquantum.rx180} - represents a rotation around the x axis
+    by 180 degrees - equivalent to a Pauli X gate up to a global phase.
+    \item \texttt{restquantum.ry90} - represents a rotation around the y axis by
+    90 degrees.
+    \item \texttt{restquantum.ry180} - represents a rotation around the y axis
+    by 180 degrees - equivalent to a Pauli Y gate up to a global phase.
+    \item \texttt{restquantum.rz90} - represents a rotation around the z axis by
+    90 degrees.
+    \item \texttt{restquantum.rz180} - represents a rotation around the z axis
+    by 180 degrees - equivalent to a Pauli Z gate up to a global phase.
+    \item \texttt{restquantum.sqrtx} - represents a square root of the Pauli X
+    gate.
+    \item \texttt{restquantum.iSWAP} - represents an iSWAP gate.
     \end{itemize}
 
 
-\section{Lowering}
-% draw a diagram of the lowering process
-% \draw[->] (0,0) -- (0,1) node[above] {Quantum Dialect};
-% Lowering the code to the \texttt{restquantum} dialect is done by the \texttt{ConvertInst} pass.
-% This pass is run after the \texttt{QuantumOpt} pass, which performs some optimizations on the quantum code.
-% The lowering is done by matching the quantum operations with the \texttt{restquantum} operations.
-% Then the \texttt{restquantum} operations are created, and the \textt{quantum} operations are replaced with them.
+\section{Pipeline}
+\subsection{Frontend}
+Using the ANTLR4 grammar live spec (now stable) on OPENQSM 3.0's website we
+created a parser for a subset of OPENQASM 3.0. This subset can certainly be
+extended to fully support the language, but for the scope of this thesis we
+focused mainly on quantum gates, quantum measurement, some control flow
+operations - namely if statements and while loops -, some arithmetic (bitwise or
+otherwise) operations, logical operations, and main type declarations(quantum or
+classical). To do this lowering we used ANTLR's parser generator JAR file, which
+generated a c++, tokenizer(\texttt{qasmLexer}) and parser(\texttt{qasmParser}),
+along with a visitor class(\texttt{qasmBaseVisitor}) having methods for each of
+the grammar rules. We then overrode these methods in the class \texttt{Visitor}
+to generate MLIR code. The parsing starts by passing an input \texttt{.qasm}
+file to the \texttt{MLIRGenerator} class, which then tokenizes it with ANTLR's
+generated tokenizer, and parses the tokens with ANTLR's generated parser.
+Starting at the start rule of OPENQASM 3.0's grammar (which is
+\texttt{program}), the visitor traverse the CST and builds MLIR code upon
+visiting nodes of supported OPENQASM 3.0 constructs.
+\subsection{MLIR Generation}
+To first inialize MLIR code building, we first need to create an
+\texttt{MLIRContext} pointer, and load all the desired dialects in the MLIR code
+building. This can be done as follows:
+\begin{minted}{c++}
+    // create an MLIR context pointer 
+    auto context = std::make_unique<MLIRContext>();
+
+    // load quantum dialect 
+    context->loadDialect<quantum::QuantumDialect();
+
+    // load restquantum dialect
+    context->loadDialect<restquantum::RestrictedQuantumDialect>();
+    
+    // load vector dialect
+    context->loadDialect<vector::VectorDialect>();
+
+    // load arithmetic dialect 
+    context->loadDialect<arith::ArithDialect>();
+
+    // ...etc
+\end{minted}
+
+Next we initialize an Operation Builder, of class \texttt{OpBuilder}, which is
+used to build MLIR operations. We pass a source code (.qasm) location to the
+\texttt{ModuleOp} builder, to construct a module operation, which is the root of
+the MLIR code. We finally construct a \texttt{FuncOp} of name \texttt{main} with
+no arguments, and an Integer 64 (I64) return type, and append it to the module
+operation. This is an analogue to the main function in C/C++, and is the entry
+point of the MLIR code. We set this function to be the operation builder's
+insertion point, to ensure that created operation are appended to the function.
+After all OPENQASM to MLIR translations are done, we build a final
+\texttt{ReturnOp} operation with an \texttt{arith::ConstantOp} of value 0, and
+append it to the function. In the next sections we will discuss different
+compiler passes we applied to to transform our MLIR code. Compiler passes are
+essentially traversal of an application's Directed Acyclic Graph (DAG), and
+applying a set of transformations to the graph.
+
+\subsubsection{Optimization}
+In this thesis optimization wasn't a main focus, but we did implement simple
+quantum optimization using quantum gate identities. These were only applied to
+the \texttt{quantum} dialect, and not the \texttt{restquantum} dialect. To do
+this we first defined our rewriter patterns simply in a TableGen file
+(\texttt{Optimize.td}). The defined patterns included the following identities:
+% draw a diagram of the quantum identities
+% ....
+
+These patterns are defined in the \texttt{Optimize.td} file as follows:
+\begin{minted}{c++}
+    // RZ(theta1) RZ(theta2) -> RZ(theta1 + theta2) 
+    def RzRz: Pat<(RzOp (RzOp $input, $theta2), $theta1), 
+        (RzOp $input, (Arith_AddFOp $theta1, $theta2,
+        (createFastMathNone)))>;
+
+    // HYH -> Y 
+    def HYH: Pat<(HOp (YOp (HOp $input))), (YOp $input)>;
+
+    // HZH -> Z 
+    def HZH: Pat<(HOp (ZOp (HOp $input))), (ZOp $input)>;
+
+    // HH -> I 
+    def HH: Pat<(HOp (HOp $input)), (IOp $input)>;
+
+    // ... more patterns
+\end{minted}
+To be able to apply these patterns in a simple manner, we employed them as parts
+of MLIR's \texttt{Conanicalizer} pass. To do so we have to set the
+\texttt{hasCanonicalizer} flag to 1 in the quantum dialect's definition, in its
+tablegen file. Next we need to implement MLIR \texttt{Dialect}'s class override
+method, \texttt{getCanonicalizationPatterns}. This is done as follows:
+\begin{minted}{c++}
+// #include ... 
+#include "quantum-mlir/Conversion/Optimize.h.inc" 
+using namespace mlir::quantum;
+
+void QuantumDialect::getCanonicalizationPatterns(
+    ::mlir::RewritePatternSet& results) const { 
+        populateWithGenerated(results); 
+}
+\end{minted}
+
+The \texttt{populateWithGenerated}  function defined in the generated
+\texttt{Optimize.h.inc} populates \texttt{results} with the patterns defined in
+\texttt{Optimize.td}. Finally, we initialize \texttt{MLIR}'s pass manager, and
+add MLIR's \texttt{Canonicalizer} pass to it. We also add the \texttt{DCE} pass,
+which is a dead code elimination pass, and common subexpression elimination (CSE)
+pass.
+The DCE pass is essential as the rewrite patterns
+defined in TableGen syntax only rewrites the last quantum gate (in direction of
+the quantum circuit), but leaves the remaining gates. By passing the
+\texttt{NoMemoryEffect} trait to our quantum gates, we allow MLIR's \texttt{DCE}
+pass to remove these remaining quantum gates as they are longer used by any
+other upcoming operations. This setting is predicated on the assumption that
+qubits have to be measured for the operations on them to be useful and not
+removed, which is fine for our purposes. Moreover, this wouldn't cause issue for
+entagled qubits because if either of them is measured both stay due to their
+joint use in a CNOT gate. Note that using Canoincalizer pass here is  as it is
+more intended for canonicalization of syntax, however since optimization isn't
+the main goal of this thesis, this was a quick and simple way to test our idea,
+but in the future this should be refactored into its own pass.
+
+
+\subsubsection{Lowering to Restricted Quantum}
+To lower to \texttt{RestQuantum}, we create a  \texttt{LowerToRestQuantum} pass.
+We add this in a \texttt{Passes.td} file where we defined all necessary passes,
+including relevant passes for the quantum simulator. We define it as follows:
+\begin{minted}{c++}
+def LowerToRestQuantum: Pass<"lower-to-restquantum", "ModuleOp"> { 
+    let summary =
+        "Lower quantum dialect instructions to restrict" 
+      + "quantum dialect instructions"; 
+    let constructor =
+        "mlir::quantum::createLowerToRestQuantumPass()"; 
+    let description = [{ }];
+}
+\end{minted}
+
+Then in a \texttt{Passes.h} file we declare a function
+\texttt{createLowerToRestQuantumPass} as follows:
+
+\mintinline{c++}|std::unique_ptr<OperationPass<ModuleOp>>|\\
+\mintinline{c++}|createLowerToRestQuantumPass();| \\Finally, we implement the pass in a
+\texttt{LowerToRestQuantum.cpp} file. There we define a
+\texttt{LowerToRestQuantum} class, which inherits from
+\texttt{LowerToRestQuantumBase}, a class generated by MLIR's TableGen. There we
+set a \texttt{ConversionTarget} \texttt{target} object with all the quantum
+dialect gates as illegal operations. We also pass rewrite pattern classes, that
+we defined, to  a \texttt{RewritePatternSet} object. These rewrite pattern
+classes transform all quantum gates in terms of \texttt{restquantum} gates.\\ 
+We then call MLIR's \texttt{applyFullConversion} function, which applies all the
+defined patterns to the current MLIR code, and lowers all illegal operations to
+legal ones. Each of the rewriter pattern classes is defined as follows:
+\begin{minted}{c++}
+class ConvertQOp : public OpConversionPattern<quantum::QOp> { 
+    using OpConversionPattern::OpConversionPattern; 
+    LogicalResult matchAndRewrite(quantum::QOp op, 
+                  PatternRewriter& rewriter) const override { 
+        // Create relevant restquantum gates 
+        // to match a quantum identity.
+        // Use rewriter.replaceOpWithNewOp 
+        // to replace the quantum gate
+        // with needed operations.
+        // Use rewriter.create 
+        // to add remaning necessary operations.
+    } 
+};
+\end{minted}
+
+We finally implement the \texttt{createLowerToRestQuantumPass} function, 
+to inialize a \texttt{unique\_ptr}  of type \texttt{LowerToRestQuantum} and return it.
+To use this pass, like we did with the \texttt{Optimize} pass, we pass it 
+to the \texttt{PassManager} object, and run it. We also add the \texttt{CSE} pass.
+
+\subsubsection{Quantum Simulator (Optional) Pass}
+The quantum simulator pass is an optional pass that can be used to simulate the
+quantum circuit. It is declared similar to the \texttt{LowerToRestQuantum} pass, and
+defined in its own \texttt{QuantumSimulator.cpp} file. 
+However, for convenience, we created a prior pass that does a forward
+declaration of all quantum allocations at the start of the MLIR code.
+Then, in the quantum simulator we sum the number of allocations multiplied by their qubit size,
+to get the totable number of qubits needed for a global state vector.
+We initialize a state vector of $\|0_{n-1}...0_0\rangle$ where $n$ is the number of qubits.
+Note, we assume the $0^{th}$ qubit is the right-most qubit in the bra-ket notation, thus
+accessing the $0^{th}$ element in the first qubit array accesses the right-most qubit, and accessing 
+the last element in the last qubit array accesses the left-most qubit.
+We use MLIR's \texttt{VectorType} to represent the state vector,
+and we initialize a vector of shape $2^n \times 2$, where each element
+of the vector is a 2d vector denoting a complex number, this is because
+complex numbers are not supported yet as types for vector elements.
+Similar to what we did in the \texttt{LowerToRestQuantum} pass, we create different
+rewrite patterns to replace all quantum operations (gates, allocations, and measurements)
+with classical counterparts, manipulating with the initialized global
+state vector. For simulating quantum gates, instead of 
+ doing a matrix multiplication that would
+involve a lot of tensoring in the case of applying a gate to a subset of qubits.
+For example if we apply a gate to the first qubit of a quantum system that can be represented by a 
+tensor product (non-entangled), the transformation would be as follows:
+\begin{equation}
+|\psi_{n-1}\rangle \otimes \psi_{n-2}\rangle  \otimes ... |\psi_0\rangle
+ \rightarrow
+ I  |\psi_{n-1}\rangle \otimes I  |\psi_{n-2}\rangle  \otimes ... X  |\psi_0\rangle 
+\end{equation}
+To avoid this excessive tensoring, we reshape our vector to a tensor in a way that we can
+isolate the qubit we want to apply the gate to in its own dimension, then apply the matrix of this gate
+to the element in that dimension in the reshaped tensor, 
+and finally reshape the tensor back to a vector of the original shape.
+
+% Lowering the code to the \texttt{restquantum} dialect is done by the
+% \texttt{ConvertInst} pass. This pass is run after the \texttt{QuantumOpt}
+% pass, which performs some optimizations on the quantum code. The lowering is
+% done by matching the quantum operations with the \texttt{restquantum}
+% operations. Then the \texttt{restquantum} operations are created, and the
+% \textt{quantum} operations are replaced with them.
 
 \section{Examples - MLIR generated code}
-\subsection{Optimizations}

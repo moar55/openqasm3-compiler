@@ -18,7 +18,7 @@
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/Verifier.h"
 
-class visitor;
+class Visitor;
 
 class MLIRGenerator{
 protected:
@@ -32,7 +32,7 @@ protected:
 
     std::map<std::string, mlir::Value> global_symbol_table;
     bool add_main = true;
-    std::shared_ptr<visitor> my_visitor;
+    std::shared_ptr<Visitor> my_visitor;
 
 public:
     MLIRGenerator(mlir::MLIRContext& ctx) : context(ctx), builder(&ctx) {
@@ -44,8 +44,8 @@ public:
 //      m_module.getOps<>()
     }
 
-    void initialize_mlirgen(const std::string entry_function_name);
-    void mlirgen(const std::string &src) ;
+    void initialize(const std::string entry_function_name);
+    void generate(const std::string &src) ;
 
     mlir::ModuleOp get_module() {
       return m_module;

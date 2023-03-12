@@ -46,7 +46,7 @@ const std::vector<std::string> single_qubit_ops = {"X", "Y", "Z", "I", "H", "S",
 const std::vector<std::string> rotation_gates = {"RX", "RY", "RZ"};
 
 
-std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *context) {
+std::any Visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *context) {
   //TODO: disallow non const expressions for indexing
   //TODO: make sure a variable is not redeclared!
   auto qgn = context->quantumGateName();
@@ -66,7 +66,7 @@ std::any visitor::visitQuantumGateCall(qasmParser::QuantumGateCallContext *conte
       printErrorMessage("Identifier " + qubit_var_name + " isn't a qubit or qubit array");
 
     if (!index->indexOperator().empty()) {
-      if (get_quantum_type(qubit_ident) != "Array")
+      if (get_quantum_type(qubit_ident) != "QubitArray")
         printErrorMessage("can't index a non qubit array type");
 
       auto index_expression = index->indexOperator().front()->expression(0);

@@ -9,10 +9,10 @@
 #include "expression_handler.h"
 #include "mlir/IR/BuiltinAttributes.h"
 
-#include "../visitor.hpp"
+#include "../Visitor.hpp"
 using namespace mlir;
 
-std::any visitor::visitBranchingStatement(qasmParser::BranchingStatementContext *ctx) {
+std::any Visitor::visitBranchingStatement(qasmParser::BranchingStatementContext *ctx) {
   qasm_expression_generator generator(builder, symbol_table);
   generator.visitExpression(ctx->expression());
   auto &cond = generator.current_value;

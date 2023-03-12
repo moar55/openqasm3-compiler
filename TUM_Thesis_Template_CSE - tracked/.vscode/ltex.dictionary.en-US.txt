@@ -1,0 +1,10 @@
+FPGAs
+QPUs
+OPENQASM
+ANTLR
+MLIR
+QPU
+inialize
+Canoincalizer
+eigensolver
+subexpression
