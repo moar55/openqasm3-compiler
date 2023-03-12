@@ -17,7 +17,6 @@ _minted*
 *.gls
 *.log
 *.out
-*.pdf
 *.tmp
 *.toc
 *.xdy
