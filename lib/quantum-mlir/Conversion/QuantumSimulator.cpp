@@ -226,47 +226,6 @@ public:
         // use select to choose between the two values
         auto select = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), rewriter.getI1Type(), cmp, zero_i1, one_i1);
         rewriter.replaceOp(op, select.getResult());
-
-        is_zero = true;
-        // construct zero mlir value
-        auto zero = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                       IntegerAttr::get(rewriter.getI1Type(), 0));
-
-        // construct one mlir value
-        auto one = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                      IntegerAttr::get(rewriter.getI1Type(), 1));
-        Value total = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(),
-                                                                FloatAttr::get(rewriter.getF64Type(), 0.0));
-
-        // construct vector of size 2 containing zeros
-        auto vec_type = VectorType::get({2}, rewriter.getI1Type());
-        auto vec = rewriter.create<vector::BroadcastOp>(rewriter.getUnknownLoc(), vec_type, zero);
-        for (int i = 0; i < in_shape[0]; i++) {
-            //extract real and img parts
-            auto real = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), vector, ArrayRef<int64_t>{i, 0});
-            auto imag = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), vector, ArrayRef<int64_t>{i, 1});
-            auto complex_val = rewriter.create<complex::CreateOp>(rewriter.getUnknownLoc(),
-                                                                  ComplexType::get(rewriter.getF64Type()), real, imag);
-            Value phase = rewriter.create<complex::AbsOp>(rewriter.getUnknownLoc(), rewriter.getF64Type(),
-                                                          complex_val).getResult();
-            // square the phase
-            Value prob = rewriter.create<arith::MulFOp>(rewriter.getUnknownLoc(), rewriter.getF64Type(), phase, phase);
-            // change to f64
-            if (i > 0 && i % stride == 0) {
-                is_zero = !is_zero;
-            }
-            if (is_zero) {
-                // if select is 1, then set the value to 0, otherwise don't change it
-                auto vall = rewriter.create<arith::CmpIOp>(rewriter.getUnknownLoc(), rewriter.getI1Type(),
-                                                          arith::CmpIPredicate::eq, select, one);
-                auto select = rewriter.create<arith::SelectOp>(rewriter.getUnknownLoc(), rewriter.getI1Type(), cmp, zero, prob);
-                zer_val_prob = rewriter.create<arith::AddFOp>(rewriter.getUnknownLoc(), rewriter.getF64Type(),
-                                                              zer_val_prob, prob);
-            } else {
-                one_val_prob = rewriter.create<arith::AddFOp>(rewriter.getUnknownLoc(), rewriter.getF64Type(),
-                                                              one_val_prob, prob);
-            }
-        }
         return success();
 
 
