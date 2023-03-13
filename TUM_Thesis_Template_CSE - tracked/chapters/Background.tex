@@ -3,13 +3,18 @@
 \label{chapter:Background}
 \section{Heterogeneous Computing}
 Heterogeneous computing refers to the use of multiple types of processing units
-or cores within a single computer system. These processing units can include
-central processing units (CPUs), graphical processing units (GPUs), 
-field programmable hate arrays (FPGAs), and application-specific integrated circuits(ASICs), each of which can perform
-specific types of computations with varying degrees of efficiency. The goal of
-heterogeneous computing is to leverage the strengths of each processing unit to
-improve the overall performance and energy efficiency of the system. For our
-purposes we will focus on heterogeneous computing that combines classical
+or cores, with the aim
+of enhancing the overall performance and energy efficiency of 
+the system.
+When mixing different types of processing units, we are able to
+utilize the strengths of each processing unit, while mitigating the weaknesses.
+These processing units can include
+central processing units (CPUs), but also other processing units - sometimes referred to as accelerators -
+like  graphical processing units (GPUs), 
+field programmable gate arrays (FPGAs), and application-specific integrated circuits(ASICs).
+Each of these processing units, can perform  
+specific types of computations with varying degrees of efficiency. 
+For our purposes we will focus on heterogeneous computing that combines classical
 computing using CPUs and quantum computing using quantum processing units (QPUs), quantum-classical
 heterogeneous computing.
 In this kind of heterogeneous computing we face the challenge of quantum
@@ -19,15 +24,15 @@ quantum behavior and fallback to a classical one.
 These two challenges are different depending on whether we are applying
 near-time or real-time quantum computing. Real-time quantum computing requires calculations to
 complete within - or faster than - the qubit coherence time, while near-time quantum computing can tolerate high
-latency.
+latency \cite{Near-Real}.
 % paraphrase
 \section{Quantum Computing Programming}
 Quantum computing programming languages are designed to help developers write
 and execute quantum algorithms on quantum computers. Although quantum computers
 are still in the early stages of development, there has been significant
 progress in the development of quantum computing programming languages. In this
-thesis we are only interested in OPENQASM 3.0. OPENQASM - short for Open Quantum
-Assembly - is a low level, quantum circuit-like language for quantum computing.
+thesis we are only interested in OPENQASM 3.0. OPENQASM - short for Open quantum
+assembly - is a low level, quantum circuit-like language for quantum computing.
 With its newest edition - OPENQASM 3.0 - OPENQASM is no longer a strictly
 quantum programming language, but rather a Heterogeneous language. It allows for
 strictly quantum operations provided in OPENQASM 2.0, but also allows classical
@@ -41,7 +46,10 @@ thesis.
 Compilation in computer science is the process of translating a source language
 to a target language. Typically, this is done in an effort to translate a
 high-level language, to a lower level language, or to machine code to be executed by
-the computer. Normally, a compiler has two main parts, the frontend and the backend.
+the computer. In this section we provide an overview of the compilation process,
+and the different stages of compilation, based on a more detailed description by 
+ \cite[p. 4-11]{Compilers}.
+Normally, a compiler has two main parts, the frontend and the backend.
 The frontend applies the analysis phase of a compiler, while the backend applies
 the synthesis phase. The analysis phase, among possibly other steps, has three
 main steps:
@@ -83,13 +91,16 @@ and the latter is done after.
 Finally, target code generation is the process of generating the
 target code to be executed on the machine. %TODO: makes this more concise
 \subsection{ANTLR}
-ANTLR (Another Tool for Language Recognition) is a parser generator that can
-read, analyze, execute, or translate structured text or binary files. It's often
-used in the creation of programming languages, tools, and frameworks
-\cite{ANTLR}. ANTLR generates a parser from a grammar defined in a domain
+ANTLR, which stands for Another Tool for Language Recognition, is a tool for generating parsers 
+that can be utilized for different tasks relevant to components of the compilation process,
+and text analysis and processing in general.
+It is frequently utilized in developing programming languages, tools, and frameworks.
+It's often
+used in the creation of programming languages, tools, and frameworks \cite{ANTLR}. ANTLR generates a parser from a grammar defined in a domain
 specific language (DSL), designed by ANTLR. ANTLR provides runtimes in multiple
 programming languages. You can choose which runtime you want your parser to be
-written in, and then you can construct and walk parse trees from input programs.
+written in, and then you can construct and walk parse trees from input programs using 
+ANTLR's runtime library.
 \subsection{LLVM and MLIR}
 \subsubsection{LLVM}
 LLVM, which stands for Low Level Virtual Machine, is a compiler framework that
@@ -97,12 +108,12 @@ enables comprehensive program analysis and transformation for various programs
 throughout their entire lifespan. It does this by providing high-level
 information to compiler transformations at compile-time, link-time, run-time,
 and in idle time between runs. LLVM uses a common, low-level code representation
-in Static Single Assignment (SSA) form, which includes a simple,
+in static single assignment (SSA) form, which includes a simple,
 language-independent type-system that exposes the primitives commonly used to
 implement high-level language features. Additionally, LLVM features an
 instruction for typed address arithmetic and a simple mechanism that can be used
 to implement the exception handling features of high-level languages and
-\texttt{setjmp}/\texttt{longjmp} in C uniformly and efficiently.
+\texttt{setjmp}/\texttt{longjmp} in C uniformly and efficiently\cite{LLVM}.
 \subsection{MLIR}
 Multi-level intermediate representation (MLIR) is a novel approach for creating
 reusable and adaptable domain specific compilers. It is designed to provide an
@@ -119,7 +130,7 @@ extension of operations, where a block is a list of operations, and a region is
 a list of blocks. A Dialect refers to a unique namespace that encompasses a
 coherent set of operations, types, and attributes that are logically grouped
 together. MLIR provides a lot of public dialects catering to different domains,
-such as the Arith Dialect, the Math Dialect, the \texttt{MemRef} (Memory Reference) Dialect,
+such as the \texttt{Arith} Dialect, the \texttt{Math} Dialect, the \texttt{MemRef} (Memory Reference) Dialect,
 and the Vector Dialect...etc. One can also create their own dialect 
 for their own domain specific application. MLIR also provides a set of tools to
 help with the creation of new dialects, such as the MLIR \texttt{TableGen} tool, which
@@ -127,20 +138,29 @@ allows for the creation of new dialects by writing a simple DSL.
 However, it should be noted that if one desires to lower down to LLVM IR, they
 will have to lower their dialect's operations in terms of the dialects provided 
 by MLIR (include the LLVM IR). There are multiple approaches and defined classes that can aid with that.
-\subsection{Efforts to Leverage MLIR for Heterogenous Quantum Computing}
+\subsection{Efforts to Leverage MLIR for heterogeneous quantum computing}
 Similar work to the one in this thesis was done by a team at Oak Ridge National Laboratory.
-QCOR, a tool created by this team, is a language extension for creating quantum kernels (in C++ and python),
-and a compiler platform for heterogeneous computing.
+QCOR, a tool created by this team, is a language extension specification for creating quantum kernels (in C++ and Python),
+and a compiler platform for heterogeneous computing \cite{qcor-cpp}\cite{qcor-python}.
 %TODO: maybe cite their paper?
 To cater for other publicly available quantum DSL's, mainly OPENQASM 2.0 and OPENQASM 3.0, they created an 
-MLIR dialect, Quantum Dialect, that allows for representation of the quantum operations in MLIR.
+MLIR dialect, Quantum Dialect, that allows for representation of the quantum operations in MLIR \cite{qcor-openqasm}\cite{qcor-openqasm-3.0}.
 They also used MLIR's pattern rewriter to perform optimizations on the quantum IR.
 Finally, they lowered it to LLVM IR in a specific format that can be executed by their own runtime, 
 that can target different quantum simulators and quantum hardware, alongside classical hardware.
 This effort was a great inspiration for this thesis,
-where we similarly created an MLIR dialect for quantum operations.
-However, the choice of the operations in the quantum dialect, 
+where we similarly created an MLIR dialect for quantum operations, and 
+also shared some similarities in the quantum operations and the structure of lowering 
+to the \texttt{quantum} dialect.
+However, there were also many areas that exhibited vast differences.
+Ranging from major differences (additions and omissions) in the operations that were defined in the quantum dialect, 
 as well as the differentiation between a generic quantum dialect and 
-a more restricted one, the way quantum operations were optimized,
- and the way we lowered OPENQASM 3.0 all the way down to LLVM IR, are all areas of vast difference.
-It is no surprise that the work done by them was a great inspiration for this thesis.
+a more restricted one, the way quantum operations were optimized, the construction 
+of a quantum simulator written purely in MLIR, and in general differences in the way we lowered OPENQASM 3.0 all the way down to LLVM IR.
+ Most noticeably as mentionend earlier we used the latest MLIR version allowing us to incorporate
+dialects like the \texttt{vector} dialect to be able to represent classical registers, for storing measurements or 
+otherwise, which allows for vectorization and more efficient classical computation.
+Moreover, we used the latest OPENQASM 3.0 grammar defined at the time of our development, which led to 
+differences in the way we lowered to the \texttt{quantum} dialect.
+Because of these differences in strategy, in the underlying library used and in OPENQASM 3.0 grammar,
+this project is naturally a complete rewrite, but was definitely vastly inspired by QCOR.

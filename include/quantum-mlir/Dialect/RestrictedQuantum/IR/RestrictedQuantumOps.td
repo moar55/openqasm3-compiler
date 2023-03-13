@@ -1,4 +1,4 @@
-#ifndef Restricted_Quantum_OPS
+ #ifndef Restricted_Quantum_OPS
 #define Restricted_Quantum_OPS
 
 include "RestrictedQuantumDialect.td"
