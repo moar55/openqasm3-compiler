@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
     pm.addPass(mlir::createCSEPass());
     pm.addPass(mlir::createSymbolDCEPass());
     pm.run(module);
-    module.dump();
+//    module.dump();
 
     pm.clear();
     //convert complex to llvm
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 //    pm.addPass(quantum::createLowerToLLVMPass());
     pm.addPass(mlir::createReconcileUnrealizedCastsPass());
     pm.run(module);
-    module.dump();
+//    module.dump();
 
     /// JIT
     llvm::InitializeNativeTarget();

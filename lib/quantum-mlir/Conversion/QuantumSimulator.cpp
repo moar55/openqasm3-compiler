@@ -61,23 +61,39 @@ std::vector<int64_t> compute_output_shape(ArrayRef<int64_t> in_shape, int64_t ne
     int64_t fourth_dim = 2;
 
     std::vector<int64_t> out_shape{first_dim, second_dim, third_dim, fourth_dim};
-    std::cout << "proper shape size: " ;
-    for (auto i : out_shape)
-        std::cout << i << " ";
-    std::cout << std::endl;
     return out_shape;
 }
 
 // helper function to compute offset for reshaping
-int64_t compute_offset(Operation *operand) {
+int64_t compute_offset(Operation *operand, Value *qubit = nullptr) {
     int offset = 0;
     // if operand is a qalloc, get offset attribute, else check if operand is an arith::ConstantOp
     if (operand->getOperand(0).getDefiningOp<quantum::QallocOp>()) {
         offset = operand->getOperand(0).getDefiningOp<quantum::QallocOp>().getOffsetAttr().getInt();
     } else { //extremely hacky method for now
         // loop over operand 0 until we find a qalloc op
+
+        // if operation has multiple results,
+        // we need to check if the qubit is the first or second result
+
+
         while (!operand->getOperand(0).getDefiningOp<quantum::QallocOp>()) {
-            operand = operand->getOperand(0).getDefiningOp();
+            if (operand->getNumResults() > 1) {
+                Value result = operand->getResult(0);
+                Value qubit_val = *qubit;
+                if (result == qubit_val) {
+                    auto val = operand->getOperand(0);
+                    operand = operand->getOperand(0).getDefiningOp();
+                    qubit = &val;
+                }
+                else {
+                    auto val = operand->getOperand(1);
+                    operand = operand->getOperand(1).getDefiningOp();
+                    qubit = &val;
+                }
+            } else {
+                operand = operand->getOperand(0).getDefiningOp();
+            }
         }
         offset = operand->getOperand(0).getDefiningOp<quantum::QallocOp>().getOffsetAttr().getInt();
     }
@@ -126,7 +142,12 @@ public:
         auto vector = rewriter.create<memref::LoadOp>(rewriter.getUnknownLoc(), global_vector).getResult();
         // get index of qubit to measure
         Operation *operand = op.getQubit().getDefiningOp();
-        auto net_offset = compute_offset(operand);
+
+        // compare qubit to first output of operation
+        auto qubit = op.getQubit();
+
+
+        auto net_offset = compute_offset(operand, &qubit);
         int stride = pow(2, net_offset);
 
 //        //for now do it the hacky way
@@ -199,6 +220,8 @@ public:
                                                               one_val_prob, prob);
             }
         }
+
+
         //TODO: revert back to comparison of a random value
 
         std::random_device rd;
@@ -668,6 +691,7 @@ public:
 
 
 
+
 class ConvertRx90 : public OpConversionPattern<restquantum::Rx90Op> {
 
 public:
@@ -704,11 +728,6 @@ public:
 
         std::vector<int64_t> out_shape = compute_output_shape(in_shape, net_index);
         // print output vector shape
-        std::cout << "output shape: " << std::endl;
-        for (auto &el: out_shape) {
-            std::cout << el << " ";
-        }
-        std::cout << std::endl;
 
         auto vector_type = VectorType::get(out_shape,rewriter.getF64Type());
         Value new_vec =  rewriter.replaceOpWithNewOp<vector::ShapeCastOp>(op, vector_type, vector);
@@ -811,8 +830,6 @@ public:
 
     LogicalResult matchAndRewrite(restquantum::Rx180Op op, OpAdaptor adaptor,
                                   ConversionPatternRewriter &rewriter) const override {
-        std::cout << "hi" << "\n";
-        //julia uses column to row syntax
 
         auto operand = op->getOperand(0).getDefiningOp();
         auto net_index = compute_offset(operand);
@@ -929,6 +946,78 @@ public:
 };
 
 
+class ConvertiSwap : public OpConversionPattern<restquantum::iSwapOp> {
+
+public:
+    Value global_vector;
+
+    ConvertiSwap(TypeConverter &typeConverter, MLIRContext *context, Value global_vector, PatternBenefit benefit = 1)
+            : OpConversionPattern<restquantum::iSwapOp>(typeConverter, context, benefit) {
+        this->global_vector = global_vector;
+    }
+
+    ConvertiSwap(MLIRContext *context, Value global_vector, PatternBenefit benefit = 1)
+            : OpConversionPattern<restquantum::iSwapOp>(context, benefit) {
+        this->global_vector = global_vector;
+    }
+
+    LogicalResult matchAndRewrite(restquantum::iSwapOp op, OpAdaptor adaptor,
+                                  ConversionPatternRewriter &rewriter) const override {
+        // get input vector
+        auto vector = rewriter.create<memref::LoadOp>(rewriter.getUnknownLoc(), global_vector).getResult();
+
+        // build imaginary value i
+        auto real_val = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), FloatAttr::get(rewriter.getF64Type(), 0), rewriter.getF64Type());
+        auto imag_val = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), FloatAttr::get(rewriter.getF64Type(), 1), rewriter.getF64Type());
+        auto complex_i = rewriter.create<complex::CreateOp>(rewriter.getUnknownLoc(), ComplexType::get(rewriter.getF64Type()),
+                                                                   real_val, imag_val);
+
+        // multiply |01> by i
+        auto zero_one_real = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), vector, ArrayRef<int64_t>{1,0});
+        auto zero_one_img = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), vector, ArrayRef<int64_t>{1,1});
+
+
+        // build complex number
+        auto zero_one_complex = rewriter.create<complex::CreateOp>(rewriter.getUnknownLoc(),ComplexType::get(rewriter.getF64Type()), zero_one_real, zero_one_img);
+        // print complex number
+
+        // multiply by i
+        auto zero_one_complex_i = rewriter.create<complex::MulOp>(rewriter.getUnknownLoc(), zero_one_complex, complex_i);
+        // extract value and put back into the vector at |10> position
+        auto zero_one_real_i = rewriter.create<complex::ReOp>(rewriter.getUnknownLoc(), rewriter.getF64Type() ,zero_one_complex_i);
+        auto zero_one_img_i = rewriter.create<complex::ImOp>(rewriter.getUnknownLoc(), rewriter.getF64Type() ,zero_one_complex_i);
+
+
+        // multiply |10> by i
+        auto one_zero_real = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), vector, ArrayRef<int64_t>{2,0});
+        auto one_zero_img = rewriter.create<vector::ExtractOp>(rewriter.getUnknownLoc(), vector, ArrayRef<int64_t>{2,1});
+
+        // build complex number
+        auto one_zero_complex = rewriter.create<complex::CreateOp>(rewriter.getUnknownLoc(),ComplexType::get(rewriter.getF64Type()), one_zero_real, one_zero_img);
+        // multiply by i
+        auto one_zero_complex_i = rewriter.create<complex::MulOp>(rewriter.getUnknownLoc(), one_zero_complex, complex_i);
+        // extract value and put back into vector at |10> position
+        auto one_zero_real_i = rewriter.create<complex::ReOp>(rewriter.getUnknownLoc(), rewriter.getF64Type() ,one_zero_complex_i);
+        auto one_zero_img_i = rewriter.create<complex::ImOp>(rewriter.getUnknownLoc(), rewriter.getF64Type() ,one_zero_complex_i);
+
+
+        // set values in vector
+        vector = rewriter.create<vector::InsertOp>(rewriter.getUnknownLoc(), zero_one_real_i, vector, ArrayRef<int64_t>{2,0});
+        vector = rewriter.create<vector::InsertOp>(rewriter.getUnknownLoc(), zero_one_img_i, vector, ArrayRef<int64_t>{2,1});
+        vector = rewriter.create<vector::InsertOp>(rewriter.getUnknownLoc(), one_zero_real_i, vector, ArrayRef<int64_t>{1,0});
+        vector = rewriter.create<vector::InsertOp>(rewriter.getUnknownLoc(), one_zero_img_i, vector, ArrayRef<int64_t>{1,1});
+
+
+//        rewriter.replaceOp(op, vector);
+
+        rewriter.eraseOp(op);
+        rewriter.create<memref::StoreOp>(rewriter.getUnknownLoc(), vector, global_vector);
+        return success();
+    };
+};
+
+
+
 class QuantumSimulator
         : public quantum::QuantumSimulatorBase<QuantumSimulator> {
 public:
@@ -997,6 +1086,7 @@ public:
         patterns.add<ConvertRy90>(typeConverter, context, global_vector);
         patterns.add<ConvertPrintGlobalVector>(typeConverter, context, global_vector);
         patterns.add<ConvertMeasure>(typeConverter, context, global_vector);
+        patterns.add<ConvertiSwap>(typeConverter, context, global_vector);
         if (failed(applyFullConversion(getOperation(), target, std::move(patterns)))) {
             return signalPassFailure();
         }

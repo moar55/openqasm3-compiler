@@ -221,6 +221,27 @@ public :
     }
 };
 
+Value ryneg90(ConversionPatternRewriter &rewriter, Location loc, Value operand) {
+    FloatType f64 = rewriter.getF64Type();
+    // half pi_attr
+    FloatAttr pi_half_attr = FloatAttr::get(f64, M_PI / 2);
+    // neg half pi attr
+    FloatAttr pi_neg_half_attr = FloatAttr::get(f64, -M_PI / 2);
+
+    Value pi_half_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_half_attr, f64).getResult();
+    Value pi_neg_half_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_neg_half_attr, f64).getResult();
+
+    // create rz(pi/2)
+    operand = rewriter.create<restquantum::RzOp>(rewriter.getUnknownLoc(), operand.getType(), operand, pi_half_op);
+    // create rx90
+    operand = rewriter.create<restquantum::Rx90Op>(rewriter.getUnknownLoc(), operand.getType(), operand);
+    // create rz(-pi/2)
+    operand = rewriter.create<restquantum::RzOp>(rewriter.getUnknownLoc(), operand.getType(), operand, pi_neg_half_op);
+    return operand;
+
+
+}
+
 class ConvertCXGate : public OpConversionPattern<quantum::CXOp> {
 public :
     using OpConversionPattern::OpConversionPattern;
@@ -228,7 +249,57 @@ public :
     LogicalResult matchAndRewrite(quantum::CXOp op, OpAdaptor adaptor,
                                   ConversionPatternRewriter &rewriter) const override {
         // refactor later, now just use restquantum::CX
-        rewriter.replaceOpWithNewOp<restquantum::CXOp>(op, op->getOperand(0).getType(), op->getOperand(1).getType(), op->getOperand(0), op->getOperand(1));
+
+        auto control_qubit = op->getOperand(0);
+        auto target_qubit = op->getOperand(1);
+        auto loc = control_qubit.getLoc();
+
+        // apply RY(-90) to control qubit
+        control_qubit = ryneg90(rewriter, loc, control_qubit);
+
+        // apply RY(-90) to target qubit
+        target_qubit = ryneg90(rewriter, loc, target_qubit);
+
+        // apply RZ(-pi) to control qubit
+        FloatType f64 = rewriter.getF64Type();
+        FloatAttr pi_attr = FloatAttr::get(f64, -M_PI);
+        Value pi_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_attr, f64).getResult();
+        control_qubit = rewriter.create<restquantum::RzOp>(rewriter.getUnknownLoc(), control_qubit.getType(), control_qubit, pi_op);
+
+        // apply iswap to both
+        rewriter.replaceOpWithNewOp<restquantum::iSwapOp>(op, control_qubit.getType(), target_qubit.getType(), control_qubit, target_qubit);
+
+
+        // apply ry180 to control qubit
+        rewriter.create<restquantum::Ry180Op>(rewriter.getUnknownLoc(), control_qubit.getType(), control_qubit);
+
+        // apply ry(-90) to target qubit
+        target_qubit = ryneg90(rewriter, loc, target_qubit);
+
+        // apply rz(-pi) to control qubit
+        control_qubit = rewriter.create<restquantum::RzOp>(rewriter.getUnknownLoc(), control_qubit.getType(), control_qubit, pi_op);
+
+        // apply iswap to both
+        rewriter.create<restquantum::iSwapOp>(rewriter.getUnknownLoc(), control_qubit.getType(), target_qubit.getType(), control_qubit, target_qubit);
+
+        // apply ry(-90) to control qubit
+        control_qubit = ryneg90(rewriter, loc, control_qubit);
+
+        // apply rz(pi/2) to target qubit
+        FloatAttr pi_half_attr_pos = FloatAttr::get(f64, M_PI / 2);
+        Value pi_half_op_pos = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_half_attr_pos, f64).getResult();
+        target_qubit = rewriter.create<restquantum::RzOp>(rewriter.getUnknownLoc(), target_qubit.getType(), target_qubit, pi_half_op_pos);
+
+
+        // apply rz(-pi/2) to control qubit
+        FloatAttr pi_half_attr = FloatAttr::get(f64, -M_PI / 2);
+        Value pi_half_op = rewriter.create<arith::ConstantOp>(rewriter.getUnknownLoc(), pi_half_attr, f64).getResult();
+        control_qubit = rewriter.create<restquantum::RzOp>(rewriter.getUnknownLoc(), control_qubit.getType(), control_qubit, pi_half_op);
+
+        // apply ry(-90) to target qubit
+        target_qubit = ryneg90(rewriter, loc, target_qubit);
+
+
         return success();
     }
 };

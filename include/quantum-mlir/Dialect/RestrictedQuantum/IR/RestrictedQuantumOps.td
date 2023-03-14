@@ -43,7 +43,7 @@ let results = (outs QubitType: $control, QubitType: $sink);
 }
 
 
-def ISWAP : RestrictedQuantumOp<"iswap"> {
+def iSwapOp : RestrictedQuantumOp<"iswap", [NoMemoryEffect]> {
     let arguments = (ins QubitType: $q0, QubitType: $q1);
     let results = (outs QubitType: $q0_, QubitType: $q1_);
 }
